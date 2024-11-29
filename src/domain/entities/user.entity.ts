@@ -30,7 +30,7 @@ export class User implements IUser {
         this._email = data.email;
         this._uf = data.uf;
         this._pixKey = data.pixKey;
-        this._password = bcrypt.hashSync(data.password, 12);
+        this._password = data.password;
         this._affiliateId = data.affiliateId;
         this._accountTypeId = data.accountTypeId;
         this._userTypeId = data.userTypeId;
@@ -182,6 +182,10 @@ export class User implements IUser {
 
     get updatedAt(): Date {
         return this._updatedAt;
+    }
+
+    hashPassword() {
+        this._password = bcrypt.hashSync(this._password, 12)
     }
 
     comparePassword(password: string): boolean {

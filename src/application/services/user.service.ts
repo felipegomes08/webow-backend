@@ -77,6 +77,8 @@ export class UserService implements  IUserService {
             }
         );
 
+        user.hashPassword()
+
         const userCreated = await this.userRepository.create(user)
 
         await this.refreshTokenRepository.create(
