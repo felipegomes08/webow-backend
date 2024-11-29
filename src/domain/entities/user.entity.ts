@@ -1,4 +1,5 @@
 import { IAccountType, IUser, IUserStatus, IUserType } from "@interfaces/user";
+import bcrypt from 'bcrypt'
 
 export class User implements IUser {
     private _id: string;
@@ -29,7 +30,7 @@ export class User implements IUser {
         this._email = data.email;
         this._uf = data.uf;
         this._pixKey = data.pixKey;
-        this._password = data.password;
+        this._password = bcrypt.hashSync(data.password, 12);
         this._affiliateId = data.affiliateId;
         this._accountTypeId = data.accountTypeId;
         this._userTypeId = data.userTypeId;
@@ -100,7 +101,7 @@ export class User implements IUser {
     }
 
     set password(value: string) {
-        this._password = value;
+        this._password = bcrypt.hashSync(value, 12);
     }
 
     get affiliateId(): string | null {
@@ -181,6 +182,10 @@ export class User implements IUser {
 
     get updatedAt(): Date {
         return this._updatedAt;
+    }
+
+    comparePassword(password: string): boolean {
+        return bcrypt.compareSync(password, this._password);
     }
 }
 
