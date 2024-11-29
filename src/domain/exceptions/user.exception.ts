@@ -1,0 +1,39 @@
+export class InvalidUserStatusException extends Error {
+    public readonly httpStatusCode = 400
+
+    constructor() {
+        super()
+        this.name = InvalidUserStatusException.name
+        this.message = 'O status do usuário é inválido!'
+    }
+}
+
+export class InvalidUserTypeException extends Error {
+    public readonly httpStatusCode = 400
+
+    constructor() {
+        super()
+        this.name = InvalidUserTypeException.name
+        this.message = 'O tipo do usuário é inválido!'
+    }
+}
+
+export class InvalidAccountTypeException extends Error {
+    public readonly httpStatusCode = 400
+
+    constructor() {
+        super()
+        this.name = InvalidAccountTypeException.name
+        this.message = 'O tipo de conta é inválido!'
+    }
+}
+
+export class EmailAlreadyExistsException extends Error {
+    public readonly httpStatusCode = 409
+
+    constructor() {
+        super()
+        this.name = EmailAlreadyExistsException.name
+        this.message = 'Email already exists!'
+    }
+}

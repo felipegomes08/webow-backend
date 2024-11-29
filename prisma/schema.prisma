@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,199 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model TransactionType {
+  id           String               @id @default(uuid()) @db.Uuid
+  name         String
+  label        String?
+  transactions Transaction[]
+  requests     TransactionRequest[]
+
+  @@map("transaction_type")
+}
+
+model RequestStatus {
+  id                 String               @id @default(uuid()) @db.Uuid
+  name               String
+  label              String
+  transactionRequest TransactionRequest[]
+
+  @@map("request_status")
+}
+
+model MatchResult {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String
+  label          String
+  matches        Match[]
+  rouletteValues RouletteValue[]
+
+  @@map("match_result")
+}
+
+model Configuration {
+  id        String  @id @default(uuid()) @db.Uuid
+  pixel     String
+  interface String
+  system    String
+  active    Boolean @default(true)
+
+  @@map("configurations")
+}
+
+model RouletteValue {
+  id            String      @id @default(uuid()) @db.Uuid
+  matchResultId String      @map("match_result_id") @db.Uuid
+  label         String
+  value         Decimal
+  matchResult   MatchResult @relation(fields: [matchResultId], references: [id])
+
+  @@map("roulette_values")
+}
+
+model UserType {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String
+  label String
+  users User[]
+
+  @@map("user_type")
+}
+
+model UserStatus {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String
+  label String
+  users User[]
+
+  @@map("user_status")
+}
+
+model AccountType {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String
+  label String
+  users User[]
+
+  @@map("account_type")
+}
+
+model User {
+  id            String               @id @default(uuid()) @db.Uuid
+  name          String
+  cpf           String               @db.VarChar(11)
+  phone         String
+  email         String
+  uf            String               @db.VarChar(2)
+  pixKey        String               @map("pix_key")
+  password      String
+  affiliateId   String?              @map("affiliate_id") @db.Uuid
+  accountTypeId String               @map("account_type_id") @db.Uuid
+  userTypeId    String               @map("user_type_id") @db.Uuid
+  balance       Decimal              @default(0.00) @db.Decimal(18, 2)
+  statusId      String               @map("status_id") @db.Uuid
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+  affiliate     Affiliate?           @relation("UserToAffiliate", fields: [affiliateId], references: [id])
+  accountType   AccountType          @relation(fields: [accountTypeId], references: [id])
+  userType      UserType             @relation(fields: [userTypeId], references: [id])
+  status        UserStatus           @relation(fields: [statusId], references: [id])
+  affiliates    Affiliate[]          @relation("AffiliateToUser")
+  transactions  Transaction[]
+  requests      TransactionRequest[]
+  matches       Match[]
+  RefreshToken  RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("refresh_tokens")
+}
+
+model Affiliate {
+  id                String             @id @default(uuid()) @db.Uuid
+  code              String
+  userId            String             @map("user_id") @db.Uuid
+  link              String
+  balance           Decimal            @default(0.00) @db.Decimal(18, 2)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt         DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+  active            Boolean            @default(true)
+  user              User               @relation("AffiliateToUser", fields: [userId], references: [id])
+  referredUsers     User[]             @relation("UserToAffiliate")
+  affiliatePayments AffiliatePayment[]
+  affiliateEarnings AffiliateEarning[]
+
+  @@map("affiliates")
+}
+
+model Transaction {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  transactionTypeId String          @map("transaction_type_id") @db.Uuid
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp()
+  amount            Decimal         @db.Decimal(18, 2)
+  user              User            @relation(fields: [userId], references: [id])
+  transactionType   TransactionType @relation(fields: [transactionTypeId], references: [id])
+
+  @@map("transactions")
+}
+
+model TransactionRequest {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  transactionTypeId String          @map("transaction_type_id") @db.Uuid
+  statusId          String          @map("status_id") @db.Uuid
+  amount            Decimal         @db.Decimal(18, 2)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp()
+  user              User            @relation(fields: [userId], references: [id])
+  transactionType   TransactionType @relation(fields: [transactionTypeId], references: [id])
+  status            RequestStatus   @relation(fields: [statusId], references: [id])
+
+  @@map("transaction_requests")
+}
+
+model Match {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  matchResultId String      @map("match_result_id") @db.Uuid
+  amount        Decimal     @db.Decimal(18, 2)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp()
+  user          User        @relation(fields: [userId], references: [id])
+  matchResult   MatchResult @relation(fields: [matchResultId], references: [id])
+
+  @@map("matches")
+}
+
+model AffiliatePayment {
+  id          String    @id @default(uuid()) @db.Uuid
+  amount      Decimal   @db.Decimal(18, 2)
+  affiliateId String    @map("affiliate_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id])
+
+  @@map("affiliate_payments")
+}
+
+model AffiliateEarning {
+  id              String    @id @default(uuid()) @db.Uuid
+  amount          Decimal   @db.Decimal(18, 2)
+  percentage      Decimal
+  affiliateAction String    @map("affiliate_action")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  affiliateId     String    @map("affiliate_id") @db.Uuid
+  affiliate       Affiliate @relation(fields: [affiliateId], references: [id])
+
+  @@map("affiliate_earnings")
 }

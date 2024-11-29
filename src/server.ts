@@ -1,1 +1,0 @@
-console.log('Compilado com sucesso');
