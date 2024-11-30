@@ -1,7 +1,7 @@
 import type { Response, Request } from '@interfaces/http'
 import { BaseController } from "../base.controller";
 import {IUserService} from "@interfaces/user";
-import {RegisterUserDto} from "./dto";
+import {CreateUserDto, RegisterUserDto, UpdateUserDto} from "./dto";
 import {toResultAsync} from "@shared/utils";
 import {UserMapper} from "@shared/mappers";
 import {FastifyInstance} from "fastify";
@@ -21,6 +21,38 @@ export class UsersController extends BaseController {
             RegisterUserDto,
             [],
             false
+        )
+
+        this.post(
+            '/api/users',
+            async (req, res) => this.createUserRouteHandler(req, res, this.userService),
+            CreateUserDto,
+            ['administrator'],
+            true
+        )
+
+        this.put(
+            '/api/users/:id',
+            async (req, res) => this.updateUserRouteHandler(req, res, this.userService),
+            UpdateUserDto,
+            ['administrator'],
+            true
+        )
+
+        this.get(
+            '/api/users/:id',
+            async (req, res) => this.getUserRouteHandler(req, res, this.userService),
+            null,
+            ['administrator'],
+            true
+        )
+
+        this.get(
+            '/api/users',
+            async (req, res) => this.getAllUserRouteHandler(req, res, this.userService),
+            null,
+            ['administrator'],
+            true
         )
     }
 
@@ -42,6 +74,94 @@ export class UsersController extends BaseController {
         res.setStatusCode(201).send({
             success: true,
             data: UserMapper.toController(user)
+        })
+    }
+
+    async createUserRouteHandler(req: Request, res: Response, userService: IUserService) {
+        const data = CreateUserDto.parse(req.body)
+
+        const [err, user] = await toResultAsync(userService.createUser(data))
+
+        if (err) {
+            const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
+            const statusCode = err.httpStatusCode ?? 500
+            console.error(err)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
+        }
+
+        res.setStatusCode(201).send({
+            success: true,
+            data: UserMapper.toController(user)
+        })
+    }
+
+    async updateUserRouteHandler(req: Request, res: Response, userService: IUserService) {
+        const data = UpdateUserDto.parse(req.body)
+        const userId = (req.params as any).id!
+
+        const [err, user] = await toResultAsync(userService.updateUser(userId, data))
+
+        if (err) {
+            const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
+            const statusCode = err.httpStatusCode ?? 500
+            console.error(err)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
+        }
+
+        res.setStatusCode(200).send({
+            success: true,
+            data: UserMapper.toController(user)
+        })
+    }
+
+    async getUserRouteHandler(req: Request, res: Response, userService: IUserService) {
+        const { id } = req.params as any
+
+        const [err, user] = await toResultAsync(userService.getUserById(id))
+
+        if (err) {
+            const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
+            const statusCode = err.httpStatusCode ?? 500
+            console.error(err)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
+        }
+
+        res.setStatusCode(200).send({
+            success: true,
+            data: user ? UserMapper.toController(user) : null
+        });
+    }
+
+    async getAllUserRouteHandler(req: Request, res: Response, userService: IUserService) {
+        const { page, limit } = req.query as any
+
+        const [err, response] = await toResultAsync(userService.getAllUsers(page, limit))
+
+        if (err) {
+            const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
+            const statusCode = err.httpStatusCode ?? 500
+            console.error(err)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
+        }
+
+        res.setStatusCode(200).send({
+            success: true,
+            data: {
+                users: response.users.map(UserMapper.toController),
+                total: response.total
+            }
         })
     }
 

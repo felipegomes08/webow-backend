@@ -1,4 +1,4 @@
-import {IRegisterUser, IUserService} from "@interfaces/user";
+import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUser, IUserService} from "@interfaces/user";
 import {
     AccountTypeRepository, RefreshTokenRepository,
     UserRepository,
@@ -95,6 +95,138 @@ export class UserService implements  IUserService {
         userCreated.accessToken = token
 
         return userCreated;
+    }
+
+    async createUser(dto: ICreateUser): Promise<IUser> {
+        const user = new User({
+            name: dto.name,
+            cpf: dto.cpf,
+            phone: dto.phone,
+            email: dto.email,
+            uf: dto.uf,
+            pixKey: dto.pixKey,
+            password: dto.password,
+            affiliateId: null,
+            accountTypeId: "",
+            userTypeId: "",
+            statusId: "",
+            balance: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+
+        const [
+            [errEmail],
+            [errAccountType],
+            [errUserType],
+            [errUserStatus],
+        ] = await Promise.all([
+            toResultAsync(this.validateEmail(dto.email, user)),
+            toResultAsync(this.validateAccountType(dto.accountType, user)),
+            toResultAsync(this.validateUserType(dto.userType, user)),
+            toResultAsync(this.validateUserStatus(dto.status, user))
+        ]);
+
+        const err = errEmail || errAccountType || errUserType || errUserStatus;
+
+        if (err) throw err;
+
+        const privateKey = fs.readFileSync('certs/private.key');
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+                accountType: user.accountType,
+                userType: user.userType
+            },
+            privateKey,
+            {
+                algorithm: 'RS256',
+                expiresIn: '5d'
+            }
+        );
+
+        user.hashPassword()
+
+        const userCreated = await this.userRepository.create(user)
+
+        await this.refreshTokenRepository.create(
+            new RefreshToken({
+                token,
+                userId: userCreated.id,
+                expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
+                revoked: false,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            })
+        )
+
+        userCreated.accessToken = token
+
+        return userCreated;
+    }
+
+    async deleteUser(id: string): Promise<void> {
+        const user = await this.userRepository.findOneById(id);
+
+        if (!user) {
+            throw new Error('Not found user')
+        }
+
+        const status = await this.userStatusRepository.findOneByName('inactive');
+
+        if (!status) {
+            throw new Error('Not found user status')
+        }
+
+        user.statusId = status.id!;
+
+        const refreshToken = await this.refreshTokenRepository.findOneByUserId(user.id);
+
+        if (!refreshToken) {
+            throw new Error('Not found refresh token')
+        }
+
+        refreshToken.revoked = true;
+
+        await this.refreshTokenRepository.update(refreshToken.id!, refreshToken);
+    }
+
+    async updateUser(id: string, data: Partial<IUser>): Promise<IUser> {
+        const user = await this.userRepository.findOneById(id);
+
+        if (!user) {
+            throw new Error('Not found user')
+        }
+
+        Object.assign(user, data)
+
+        if (data.password) {
+            user.hashPassword()
+        }
+
+        return await this.userRepository.update(id, user)
+    }
+
+    async getUserById(id: string): Promise<IUser | null> {
+        const user = await this.userRepository.findOneById(id);
+
+        if (!user) {
+            throw new Error('Not found user');
+        }
+
+        return user;
+    }
+
+    async getAllUsers(page?: number, limit?: number): Promise<IGetAllUsersResponse> {
+        const users = await this.userRepository.findAll(page, limit);
+        const countAllUsers = await this.userRepository.count();
+
+        return {
+            users,
+            total: countAllUsers
+        }
     }
 
     async validateUserType(userType: string, user: User): Promise<User> {

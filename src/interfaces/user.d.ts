@@ -57,14 +57,43 @@ export interface ICreateUser {
     uf: string;
     pixKey: string;
     password: string;
-    affiliateCode: string | null;
+    affiliateCode?: string;
     accountType: string;
     userType: string;
     status: string;
 }
 
+export interface IUpdateUser {
+    name?: string;
+    cpf?: string;
+    phone?: string;
+    email?: string;
+    uf?: string;
+    pixKey?: string;
+    password?: string;
+    accountType?: string;
+    affiliateCode?: string;
+    userType?: string;
+    status?: string;
+}
+
+export interface IGetAllUsersResponse {
+    users: IUser[];
+    total: number;
+}
+
 export interface IUserService {
 
     registerUser(dto: IRegisterUser): Promise<IUser>;
+
+    getAllUsers(page?: number, limit?: number): Promise<IGetAllUsersResponse>;
+
+    getUserById(id: string): Promise<IUser | null>;
+
+    deleteUser(id: string): Promise<void>;
+
+    updateUser(id: string, data: IUpdateUser): Promise<IUser>;
+
+    createUser(data: ICreateUser): Promise<IUser>;
 
 }

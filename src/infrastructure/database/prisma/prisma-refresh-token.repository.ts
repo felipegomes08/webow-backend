@@ -35,7 +35,8 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
     async findOneByUserId(userId: string): Promise<RefreshToken | null> {
         const refreshToken = await this.prisma.refreshToken.findFirst({
             where: {
-                userId
+                userId,
+                revoked: false
             },
             include: {
                user: true
@@ -50,7 +51,8 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
     async findOneByToken(token: string): Promise<RefreshToken | null> {
         const refreshToken = await this.prisma.refreshToken.findFirst({
             where: {
-                token
+                token,
+                revoked: false
             },
             include: {
                 user: true

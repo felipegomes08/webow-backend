@@ -10,6 +10,7 @@ export abstract class UserRepository {
 
     abstract findOneById(id: string): Promise<User | null>
 
-    abstract findAll(): Promise<User[]>
+    abstract findAll(page?: number, limit?: number): Promise<User[]>
 
+    abstract count(): Promise<number>
 }
