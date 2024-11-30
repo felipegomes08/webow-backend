@@ -8,6 +8,8 @@ export abstract class UserRepository {
 
     abstract findOneByEmail(email: string): Promise<User | null>
 
+    abstract findOneById(id: string): Promise<User | null>
+
     abstract findAll(): Promise<User[]>
 
 }

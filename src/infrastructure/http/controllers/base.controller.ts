@@ -72,8 +72,7 @@ export class BaseController implements IController {
     }
 
     protected jwtSign(payload: any) {
-        const token = this.fastify.jwt.sign({ payload })
-        return token
+        return this.fastify.jwt.sign({ payload })
     }
 
     protected addDtoValidation(req: Request, res: Response, dto: ZodSchema | null) {
