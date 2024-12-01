@@ -92,7 +92,7 @@ export class BaseController implements IController {
         if (requiresAuth) {
             await (this.fastify as any).authenticate(req, res);
 
-            const user = req?.user?.payload;
+            const user = req?.user;
 
             if (!roles.length || roles.includes(user.userType)) {
                 req.user = user

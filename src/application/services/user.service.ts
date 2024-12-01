@@ -1,4 +1,4 @@
-import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUser, IUserService} from "@interfaces/user";
+import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUpdateUser, IUser, IUserService} from "@interfaces/user";
 import {
     AccountTypeRepository, RefreshTokenRepository,
     UserRepository,
@@ -193,7 +193,7 @@ export class UserService implements  IUserService {
         await this.refreshTokenRepository.update(refreshToken.id!, refreshToken);
     }
 
-    async updateUser(id: string, data: Partial<IUser>): Promise<IUser> {
+    async updateUser(id: string, data: IUpdateUser): Promise<IUser> {
         const user = await this.userRepository.findOneById(id);
 
         if (!user) {

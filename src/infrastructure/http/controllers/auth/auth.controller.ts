@@ -47,7 +47,7 @@ export class AuthController extends BaseController {
             })
         }
 
-        res.setStatusCode(201).send({
+        res.setStatusCode(200).send({
             success: true,
             data: UserMapper.toController(user)
         })
@@ -68,7 +68,7 @@ export class AuthController extends BaseController {
             })
         }
 
-        res.setStatusCode(201).send({
+        res.setStatusCode(200).send({
             success: true,
             data: response
         })
