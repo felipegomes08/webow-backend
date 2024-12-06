@@ -9,6 +9,6 @@ const passwordSchema = z
     .regex(/[!@#$%^&*(),.?":{}|<>]/, "A senha deve conter pelo menos um caractere especial.");
 
 export const LoginDto = z.object({
-    email: z.string().email(),
+    cpf: z.string().length(11),
     password: passwordSchema
 })

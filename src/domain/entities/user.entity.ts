@@ -3,12 +3,12 @@ import bcrypt from 'bcrypt'
 
 export class User implements IUser {
     private _id: string;
-    private _name: string;
+    private _name: string | null;
     private _cpf: string;
     private _phone: string;
-    private _email: string;
-    private _uf: string;
-    private _pixKey: string;
+    private _email: string | null;
+    private _uf: string | null;
+    private _pixKey: string | null;
     private _password: string;
     private _affiliateId: string | null;
     private _accountTypeId: string;
@@ -48,7 +48,7 @@ export class User implements IUser {
         return this._id;
     }
 
-    get name(): string {
+    get name(): string | null {
         return this._name;
     }
 
@@ -72,7 +72,7 @@ export class User implements IUser {
         this._phone = value;
     }
 
-    get email(): string {
+    get email(): string | null {
         return this._email;
     }
 
@@ -80,7 +80,7 @@ export class User implements IUser {
         this._email = value;
     }
 
-    get uf(): string {
+    get uf(): string | null {
         return this._uf;
     }
 
@@ -88,7 +88,7 @@ export class User implements IUser {
         this._uf = value;
     }
 
-    get pixKey(): string {
+    get pixKey(): string | null {
         return this._pixKey;
     }
 

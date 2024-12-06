@@ -10,7 +10,7 @@ import {toResultAsync} from "@shared/utils";
 import jwt from 'jsonwebtoken'
 import fs from 'node:fs'
 import {
-    EmailAlreadyExistsException,
+    CpfAlreadyExistsException,
     InvalidAccountTypeException,
     InvalidUserStatusException,
     InvalidUserTypeException
@@ -29,12 +29,12 @@ export class UserService implements  IUserService {
 
     async registerUser(dto: IRegisterUser) {
         const user = new User({
-            name: dto.name,
+            name: dto.name ?? "",
             cpf: dto.cpf,
             phone: dto.phone,
-            email: dto.email,
-            uf: dto.uf,
-            pixKey: dto.pixKey,
+            email: dto.email ?? "",
+            uf: dto.uf ?? "",
+            pixKey: dto.pixKey ?? "",
             password: dto.password,
             affiliateId: null,
             accountTypeId: "",
@@ -51,7 +51,7 @@ export class UserService implements  IUserService {
             [errUserType],
             [errUserStatus],
         ] = await Promise.all([
-            toResultAsync(this.validateEmail(dto.email, user)),
+            toResultAsync(this.validateCpf(dto.cpf, user)),
             toResultAsync(this.validateAccountType('beginner', user)),
             toResultAsync(this.validateUserType('player', user)),
             toResultAsync(this.validateUserStatus('active', user))
@@ -121,7 +121,7 @@ export class UserService implements  IUserService {
             [errUserType],
             [errUserStatus],
         ] = await Promise.all([
-            toResultAsync(this.validateEmail(dto.email, user)),
+            toResultAsync(this.validateCpf(dto.cpf, user)),
             toResultAsync(this.validateAccountType(dto.accountType, user)),
             toResultAsync(this.validateUserType(dto.userType, user)),
             toResultAsync(this.validateUserStatus(dto.status, user))
@@ -280,11 +280,11 @@ export class UserService implements  IUserService {
         return user
     }
 
-    async validateEmail(email: string, user: User): Promise<User> {
-        const userAlreadyExists = await this.userRepository.findOneByEmail(email);
+    async validateCpf(cpf: string, user: User): Promise<User> {
+        const userAlreadyExists = await this.userRepository.findOneByCpf(cpf);
 
         if (userAlreadyExists) {
-            throw new EmailAlreadyExistsException()
+            throw new CpfAlreadyExistsException()
         }
 
         return user

@@ -23,10 +23,10 @@ export class FastifyAdapter implements IServerHTTP {
         for (const controller of this.controllers) {
             for(const path in controller.routes) {
                 const route = controller.routes[path];
-
+                const routePath = path.split('_')[1];
                 this.server.route({
                     method: route.method,
-                    url: path,
+                    url: routePath,
                     handler: async (request: any, reply: any) => {
                         const middlewares = route.middlewares || [];
                         const response: Response = {
@@ -52,7 +52,7 @@ export class FastifyAdapter implements IServerHTTP {
                     }
                 })
 
-                console.log(`Added ${route.method.toUpperCase()} route ${path}`)
+                console.log(`Added ${route.method.toUpperCase()} route ${routePath}`)
             }
         }
     }

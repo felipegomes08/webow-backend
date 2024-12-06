@@ -35,7 +35,7 @@ export class UsersController extends BaseController {
             '/api/users/:id',
             async (req, res) => this.updateUserRouteHandler(req, res, this.userService),
             UpdateUserDto,
-            ['administrator'],
+            ['administrator', 'player'],
             true
         )
 

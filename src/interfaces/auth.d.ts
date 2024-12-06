@@ -1,7 +1,7 @@
 import {IUser} from "@interfaces/user";
 
 export interface IAuthLogin {
-    email: string;
+    cpf: string;
     password: string;
 }
 

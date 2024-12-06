@@ -44,12 +44,12 @@ export class UserMapper {
 
     static toPrisma(data: User): Omit<PrismaUser, 'id' | 'createdAt' | 'updatedAt'> {
         return {
-            name: data.name,
+            name: data.name ?? "",
             cpf: data.cpf,
             phone: data.phone,
-            email: data.email,
-            uf: data.uf,
-            pixKey: data.pixKey,
+            email: data.email ?? "",
+            uf: data.uf ?? "",
+            pixKey: data.pixKey ?? "",
             password: data.password,
             affiliateId: data.affiliateId,
             accountTypeId: data.accountTypeId,

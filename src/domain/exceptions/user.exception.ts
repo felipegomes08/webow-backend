@@ -37,3 +37,13 @@ export class EmailAlreadyExistsException extends Error {
         this.message = 'Email already exists!'
     }
 }
+
+export class CpfAlreadyExistsException extends Error {
+    public readonly httpStatusCode = 409
+
+    constructor() {
+        super()
+        this.name = CpfAlreadyExistsException.name
+        this.message = 'Cpf already exists!'
+    }
+}

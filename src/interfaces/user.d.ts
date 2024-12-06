@@ -18,12 +18,12 @@ export interface IAccountType {
 
 export interface IUser {
     readonly id?: string;
-    name: string;
+    name: string | null;
     cpf: string;
     phone: string;
-    email: string;
-    uf: string;
-    pixKey: string;
+    email: string | null;
+    uf: string | null;
+    pixKey: string | null;
     password: string;
     affiliateId: string | null;
     accountTypeId: string;
@@ -39,12 +39,12 @@ export interface IUser {
 }
 
 export interface IRegisterUser {
-    name: string;
+    name?: string;
     cpf: string;
     phone: string;
-    email: string;
-    uf: string;
-    pixKey: string;
+    email?: string;
+    uf?: string;
+    pixKey?: string;
     password: string;
     affiliateCode?: string;
 }

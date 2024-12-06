@@ -65,6 +65,23 @@ export class PrismaUserRepository implements UserRepository {
         return UserMapper.toDomain(user)
     }
 
+    async findOneByCpf(cpf: string): Promise<User | null> {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                cpf
+            },
+            include: {
+                userType: true,
+                accountType: true,
+                status: true
+            }
+        })
+
+        if (!user) return null
+
+        return UserMapper.toDomain(user)
+    }
+
     async findAll(page?: number, limit?: number): Promise<User[]> {
         const users = page
             ? await this.prisma.user.findMany({})

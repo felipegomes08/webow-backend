@@ -17,7 +17,7 @@ export class BaseController implements IController {
     }
 
     public get(path: string, handler: RouteHandler, dto: ZodSchema | null, roles: string[] = [], requiresAuth: boolean = true) {
-        this.routes[path] = {
+        this.routes['GET_'+path] = {
             method: 'GET',
             handler,
             middlewares: [
@@ -28,7 +28,7 @@ export class BaseController implements IController {
     }
 
     public post(path: string, handler: RouteHandler, dto: ZodSchema | null, roles: string[] = [], requiresAuth: boolean = true) {
-        this.routes[path] = {
+        this.routes['POST_'+path] = {
             method: 'POST',
             handler,
             middlewares: [
@@ -39,7 +39,7 @@ export class BaseController implements IController {
     }
 
     public put(path: string, handler: RouteHandler, dto: ZodSchema | null, roles: string[] = [], requiresAuth: boolean = true) {
-        this.routes[path] = {
+        this.routes['PUT_'+path] = {
             method: 'PUT',
             handler,
             middlewares: [
@@ -50,7 +50,7 @@ export class BaseController implements IController {
     }
 
     public patch(path: string, handler: RouteHandler, dto: ZodSchema, roles: string[] = [], requiresAuth: boolean = true) {
-        this.routes[path] = {
+        this.routes['PATCH_'+path] = {
             method: 'PATCH',
             handler,
             middlewares: [
@@ -61,7 +61,7 @@ export class BaseController implements IController {
     }
 
     public delete(path: string, handler: RouteHandler, dto: ZodSchema, roles: string[] = [], requiresAuth: boolean = true) {
-        this.routes[path] = {
+        this.routes['DELETE_'+path] = {
             method: 'DELETE',
             handler,
             middlewares: [
