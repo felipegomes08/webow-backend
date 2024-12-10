@@ -1,6 +1,7 @@
 import type { IController, IServerHTTP, Request, Response } from '@interfaces/http';
 import Fastify from 'fastify';
 import fastifyJwt, { FastifyJWT } from '@fastify/jwt';
+import cors from '@fastify/cors'
 import path from 'path';
 import { readFileSync } from 'fs';
 
@@ -59,6 +60,10 @@ export class FastifyAdapter implements IServerHTTP {
 
     async start(): Promise<void> {
         await this.setRoutes();
+
+        this.server.register(cors, {
+            origin: true
+        })
 
         this.server.register(fastifyJwt, {
             secret: {
