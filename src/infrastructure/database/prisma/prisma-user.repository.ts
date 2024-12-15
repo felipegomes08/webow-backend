@@ -97,7 +97,7 @@ export class PrismaUserRepository implements UserRepository {
                 }
             })
             : await this.prisma.user.findMany({
-                skip: page * (limit ?? 25),
+                skip: (page - 1) * (limit ?? 25),
                 take: limit ?? 25,
                 include: {
                     userType: true,
