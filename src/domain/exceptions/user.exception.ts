@@ -28,16 +28,6 @@ export class InvalidAccountTypeException extends Error {
     }
 }
 
-export class EmailAlreadyExistsException extends Error {
-    public readonly httpStatusCode = 409
-
-    constructor() {
-        super()
-        this.name = EmailAlreadyExistsException.name
-        this.message = 'Email already exists!'
-    }
-}
-
 export class CpfAlreadyExistsException extends Error {
     public readonly httpStatusCode = 409
 
@@ -45,5 +35,15 @@ export class CpfAlreadyExistsException extends Error {
         super()
         this.name = CpfAlreadyExistsException.name
         this.message = 'Cpf already exists!'
+    }
+}
+
+export class NotFoundUserException extends Error {
+    public readonly httpStatusCode = 404
+
+    constructor() {
+        super()
+        this.name = NotFoundUserException.name
+        this.message = 'Usuário não encontrado!'
     }
 }

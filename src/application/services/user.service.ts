@@ -7,14 +7,13 @@ import {
 } from "@domain/repositories";
 import {RefreshToken, User} from "@domain/entities";
 import {toResultAsync} from "@shared/utils";
-import jwt from 'jsonwebtoken'
-import fs from 'node:fs'
 import {
     CpfAlreadyExistsException,
     InvalidAccountTypeException,
     InvalidUserStatusException,
     InvalidUserTypeException
 } from "@domain/exceptions";
+import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
 
 export class UserService implements  IUserService {
 
@@ -61,21 +60,8 @@ export class UserService implements  IUserService {
 
         if (err) throw err;
 
-        const privateKey = fs.readFileSync('certs/private.key');
-
-        const token = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                accountType: user.accountType,
-                userType: user.userType
-            },
-            privateKey,
-            {
-                algorithm: 'RS256',
-                expiresIn: '5d'
-            }
-        );
+        const refreshToken = generateJwtToken(user, '7d');
+        const accessToken = generateJwtToken(user, '5d');
 
         user.hashPassword()
 
@@ -83,7 +69,7 @@ export class UserService implements  IUserService {
 
         await this.refreshTokenRepository.create(
             new RefreshToken({
-                token,
+                token: refreshToken,
                 userId: userCreated.id,
                 expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
                 revoked: false,
@@ -92,7 +78,8 @@ export class UserService implements  IUserService {
             })
         )
 
-        userCreated.accessToken = token
+        userCreated.accessToken = accessToken
+        userCreated.refreshToken = refreshToken;
 
         return userCreated;
     }
@@ -131,21 +118,8 @@ export class UserService implements  IUserService {
 
         if (err) throw err;
 
-        const privateKey = fs.readFileSync('certs/private.key');
-
-        const token = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                accountType: user.accountType,
-                userType: user.userType
-            },
-            privateKey,
-            {
-                algorithm: 'RS256',
-                expiresIn: '5d'
-            }
-        );
+        const refreshToken = generateJwtToken(user, '7d');
+        const accessToken = generateJwtToken(user, '15m');
 
         user.hashPassword()
 
@@ -153,7 +127,7 @@ export class UserService implements  IUserService {
 
         await this.refreshTokenRepository.create(
             new RefreshToken({
-                token,
+                token: refreshToken,
                 userId: userCreated.id,
                 expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
                 revoked: false,
@@ -162,7 +136,8 @@ export class UserService implements  IUserService {
             })
         )
 
-        userCreated.accessToken = token
+        userCreated.accessToken = accessToken
+        userCreated.refreshToken = refreshToken;
 
         return userCreated;
     }
@@ -225,6 +200,7 @@ export class UserService implements  IUserService {
 
         return {
             users,
+            page: page ?? null,
             total: countAllUsers
         }
     }

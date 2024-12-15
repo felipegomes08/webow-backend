@@ -5,11 +5,16 @@ export interface IAuthLogin {
     password: string;
 }
 
-export interface IRefreshToken {
-    token: string;
+export interface IRefreshTokenResponse {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface IRefreshTokenDto{
+    token: string
 }
 
 export interface IAuthService {
     login(dto: IAuthLogin): Promise<IUser>;
-    refreshToken(dto: IRefreshToken): Promise<{ token: string }>;
+    refreshToken(dto: IRefreshTokenDto): Promise<IRefreshTokenResponse>;
 }

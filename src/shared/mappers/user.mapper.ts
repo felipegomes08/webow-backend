@@ -59,7 +59,7 @@ export class UserMapper {
         }
     }
 
-    static toController(data: IUser): IUser {
+    static toController(data: IUser): Omit<IUser, 'password'> {
         return {
             id: data.id,
             name: data.name,
@@ -68,7 +68,6 @@ export class UserMapper {
             email: data.email,
             uf: data.uf,
             pixKey: data.pixKey,
-            password: data.password,
             affiliateId: data.affiliateId,
             accountTypeId: data.accountTypeId,
             accountType: data.accountType ? AccountTypeMapper.toController(data.accountType) : null,
@@ -78,6 +77,7 @@ export class UserMapper {
             statusId: data.statusId,
             status: data.status ? UserStatusMapper.toController(data.status) : null,
             accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
         }

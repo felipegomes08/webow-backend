@@ -34,6 +34,7 @@ export interface IUser {
     statusId: string;
     status?: IUserStatus | null;
     accessToken?: string;
+    refreshToken?: string;
     readonly createdAt: Date;
     readonly updatedAt: Date;
 }
@@ -79,6 +80,7 @@ export interface IUpdateUser {
 
 export interface IGetAllUsersResponse {
     users: IUser[];
+    page: number | null;
     total: number;
 }
 

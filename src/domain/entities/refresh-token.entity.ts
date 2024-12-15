@@ -22,7 +22,6 @@ export class RefreshToken implements IRefreshToken {
         this._user = data.user;
     }
 
-    // Getters e Setters
     get id(): string | undefined {
         return this._id;
     }

@@ -28,7 +28,7 @@ export class AuthController extends BaseController {
             async (req, res) => this.refreshTokenRouteHandler(req, res, this.authService),
             RefreshTokenDto,
             [],
-            true
+            false
         )
     }
 

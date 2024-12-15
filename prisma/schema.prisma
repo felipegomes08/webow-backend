@@ -8,22 +8,21 @@ datasource db {
 }
 
 model TransactionType {
-  id           String               @id @default(uuid()) @db.Uuid
+  id           String        @id @default(uuid()) @db.Uuid
   name         String
   label        String?
   transactions Transaction[]
-  requests     TransactionRequest[]
 
   @@map("transaction_type")
 }
 
-model RequestStatus {
-  id                 String               @id @default(uuid()) @db.Uuid
-  name               String
-  label              String
-  transactionRequest TransactionRequest[]
+model TransactionStatus {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  label       String
+  Transaction Transaction[]
 
-  @@map("request_status")
+  @@map("transaction_status")
 }
 
 model MatchResult {
@@ -38,9 +37,9 @@ model MatchResult {
 
 model Configuration {
   id        String  @id @default(uuid()) @db.Uuid
-  pixel     String
-  interface String
-  system    String
+  pixel     Json
+  interface Json
+  system    Json
   active    Boolean @default(true)
 
   @@map("configurations")
@@ -84,30 +83,32 @@ model AccountType {
 }
 
 model User {
-  id            String               @id @default(uuid()) @db.Uuid
-  name          String?
-  cpf           String               @db.VarChar(11)
-  phone         String
-  email         String?
-  uf            String?              @db.VarChar(2)
-  pixKey        String?              @map("pix_key")
-  password      String
-  affiliateId   String?              @map("affiliate_id") @db.Uuid
-  accountTypeId String               @map("account_type_id") @db.Uuid
-  userTypeId    String               @map("user_type_id") @db.Uuid
-  balance       Decimal              @default(0.00) @db.Decimal(18, 2)
-  statusId      String               @map("status_id") @db.Uuid
-  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt     DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
-  affiliate     Affiliate?           @relation("UserToAffiliate", fields: [affiliateId], references: [id])
-  accountType   AccountType          @relation(fields: [accountTypeId], references: [id])
-  userType      UserType             @relation(fields: [userTypeId], references: [id])
-  status        UserStatus           @relation(fields: [statusId], references: [id])
-  affiliates    Affiliate[]          @relation("AffiliateToUser")
-  transactions  Transaction[]
-  requests      TransactionRequest[]
-  matches       Match[]
-  RefreshToken  RefreshToken[]
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String?
+  cpf              String          @db.VarChar(11)
+  phone            String
+  email            String?
+  uf               String?         @db.VarChar(2)
+  pixKey           String?         @map("pix_key")
+  password         String
+  affiliateId      String?         @map("affiliate_id") @db.Uuid
+  accountTypeId    String          @map("account_type_id") @db.Uuid
+  userTypeId       String          @map("user_type_id") @db.Uuid
+  balance          Decimal         @default(0.00) @db.Decimal(18, 2)
+  statusId         String          @map("status_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+  affiliate        Affiliate?      @relation("UserToAffiliate", fields: [affiliateId], references: [id])
+  accountType      AccountType     @relation(fields: [accountTypeId], references: [id])
+  userType         UserType        @relation(fields: [userTypeId], references: [id])
+  status           UserStatus      @relation(fields: [statusId], references: [id])
+  affiliates       Affiliate[]     @relation("AffiliateToUser")
+  transactions     Transaction[]
+  matches          Match[]
+  RefreshToken     RefreshToken[]
+  Ticket           Ticket[]        @relation("TicketUser")
+  TicketUserSuport Ticket[]        @relation("TicketUserSupport")
+  ticketMessages   TicketMessage[]
 
   @@map("users")
 }
@@ -143,29 +144,19 @@ model Affiliate {
 }
 
 model Transaction {
-  id                String          @id @default(uuid()) @db.Uuid
-  userId            String          @map("user_id") @db.Uuid
-  transactionTypeId String          @map("transaction_type_id") @db.Uuid
-  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp()
-  amount            Decimal         @db.Decimal(18, 2)
-  user              User            @relation(fields: [userId], references: [id])
-  transactionType   TransactionType @relation(fields: [transactionTypeId], references: [id])
+  id        String            @id @default(uuid()) @db.Uuid
+  userId    String            @map("user_id") @db.Uuid
+  typeId    String            @map("transaction_type_id") @db.Uuid
+  statusId  String            @map("status_id") @db.Uuid
+  pixKey    String            @map("pix_key")
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamp()
+  amount    Decimal           @db.Decimal(18, 2)
+  user      User              @relation(fields: [userId], references: [id])
+  type      TransactionType   @relation(fields: [typeId], references: [id])
+  status    TransactionStatus @relation(fields: [statusId], references: [id])
 
   @@map("transactions")
-}
-
-model TransactionRequest {
-  id                String          @id @default(uuid()) @db.Uuid
-  userId            String          @map("user_id") @db.Uuid
-  transactionTypeId String          @map("transaction_type_id") @db.Uuid
-  statusId          String          @map("status_id") @db.Uuid
-  amount            Decimal         @db.Decimal(18, 2)
-  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamp()
-  user              User            @relation(fields: [userId], references: [id])
-  transactionType   TransactionType @relation(fields: [transactionTypeId], references: [id])
-  status            RequestStatus   @relation(fields: [statusId], references: [id])
-
-  @@map("transaction_requests")
 }
 
 model Match {
@@ -191,13 +182,40 @@ model AffiliatePayment {
 }
 
 model AffiliateEarning {
-  id              String    @id @default(uuid()) @db.Uuid
-  amount          Decimal   @db.Decimal(18, 2)
-  percentage      Decimal
-  affiliateAction String    @map("affiliate_action")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp()
-  affiliateId     String    @map("affiliate_id") @db.Uuid
-  affiliate       Affiliate @relation(fields: [affiliateId], references: [id])
+  id          String    @id @default(uuid()) @db.Uuid
+  amount      Decimal   @db.Decimal(18, 2)
+  percentage  Decimal
+  action      String
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  affiliateId String    @map("affiliate_id") @db.Uuid
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id])
 
   @@map("affiliate_earnings")
+}
+
+model Ticket {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  supportId String   @map("support_id") @db.Uuid
+  subject   String
+  createdAt DateTime @default(now()) @map("created_at")
+  closedAt  DateTime @map("closed_at")
+  user      User     @relation("TicketUser", fields: [userId], references: [id])
+  support   User     @relation("TicketUserSupport", fields: [supportId], references: [id])
+
+  ticketMessages TicketMessage[]
+
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  ticketId  String   @map("ticket_id") @db.Uuid
+  senderId  String   @map("sender_id") @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  @@map("ticket_messages")
 }

@@ -19,6 +19,7 @@ export class User implements IUser {
     private _statusId: string;
     private _status?: IUserStatus | null;
     private _accessToken?: string;
+    private _refreshToken?: string;
     private _createdAt: Date;
     private _updatedAt: Date;
 
@@ -42,6 +43,7 @@ export class User implements IUser {
         this._userType = data.userType;
         this._status = data.status;
         this._accessToken = data.accessToken;
+        this._refreshToken = data.refreshToken;
     }
 
     get id(): string {
@@ -174,6 +176,14 @@ export class User implements IUser {
 
     set accessToken(value: string | undefined) {
         this._accessToken = value;
+    }
+
+    get refreshToken(): string | undefined {
+        return this._refreshToken;
+    }
+
+    set refreshToken(value: string | undefined) {
+        this._refreshToken = value;
     }
 
     get createdAt(): Date {

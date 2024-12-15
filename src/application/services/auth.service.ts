@@ -1,10 +1,9 @@
 import {RefreshTokenRepository, UserRepository} from "@domain/repositories";
-import {IAuthLogin, IAuthService, IRefreshToken} from "@interfaces/auth";
+import {IAuthLogin, IAuthService, IRefreshTokenDto, IRefreshTokenResponse} from "@interfaces/auth";
 import {IUser} from "@interfaces/user";
-import fs from "node:fs";
-import jwt from "jsonwebtoken";
 import {RefreshToken} from "@domain/entities";
-import {InvalidAuthException} from "@domain/exceptions";
+import {InvalidAuthException, InvalidRefreshTokenException} from "@domain/exceptions";
+import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
 
 export class AuthService implements IAuthService {
 
@@ -27,17 +26,19 @@ export class AuthService implements IAuthService {
             throw new InvalidAuthException();
         }
 
-        const token = this.generateToken(user);
-        const refreshToken = await this.refreshTokenRepository.findOneByUserId(user.id)
+        const accessToken = generateJwtToken(user, '15m');
+        const refreshToken = generateJwtToken(user, '7d');
 
-        if (refreshToken) {
-            refreshToken.revoked = true;
-            await this.refreshTokenRepository.update(refreshToken.id!, refreshToken)
+        const userRefreshToken = await this.refreshTokenRepository.findOneByUserId(user.id)
+
+        if (userRefreshToken) {
+            userRefreshToken.revoked = true;
+            await this.refreshTokenRepository.update(userRefreshToken.id!, userRefreshToken)
         }
 
         await this.refreshTokenRepository.create(
             new RefreshToken({
-                token,
+                token: refreshToken,
                 userId: user.id,
                 expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
                 revoked: false,
@@ -46,32 +47,35 @@ export class AuthService implements IAuthService {
             })
         )
 
-        user.accessToken = token;
+        user.accessToken = accessToken;
+        user.refreshToken = refreshToken;
 
         return user;
     }
 
-    async refreshToken(dto: IRefreshToken): Promise<{ token: string }> {
-        const refreshToken = await this.refreshTokenRepository.findOneByToken(dto.token);
+    async refreshToken(dto: IRefreshTokenDto): Promise<IRefreshTokenResponse> {
+        const userRefreshToken = await this.refreshTokenRepository.findOneByToken(dto.token);
 
-        if (!refreshToken) {
-            throw new Error('Not found refresh token')
+        if (!userRefreshToken) {
+            throw new InvalidRefreshTokenException()
         }
 
-        const user = await this.userRepository.findOneById(refreshToken.userId);
+        const user = await this.userRepository.findOneById(userRefreshToken.userId);
 
         if (!user) {
-            throw new Error('Not found user')
+            throw new InvalidRefreshTokenException()
         }
 
-        const token = this.generateToken(user)
+        const accessToken = generateJwtToken(user, '15m')
+        const refreshToken = generateJwtToken(user, '7d')
 
-        refreshToken.revoked = true;
-        await this.refreshTokenRepository.update(refreshToken.id!, refreshToken);
+        userRefreshToken.revoked = true;
+
+        await this.refreshTokenRepository.update(userRefreshToken.id!, userRefreshToken);
 
         await this.refreshTokenRepository.create(
             new RefreshToken({
-                token,
+                token: refreshToken,
                 userId: user.id,
                 expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
                 revoked: false,
@@ -81,23 +85,8 @@ export class AuthService implements IAuthService {
         )
 
         return {
-            token: token
+            accessToken,
+            refreshToken
         }
-    }
-
-    private generateToken(user: IUser): string {
-        return jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                accountType: user.accountType?.name,
-                userType: user.userType?.name
-            },
-            fs.readFileSync('certs/private.key'),
-            {
-                algorithm: 'RS256',
-                expiresIn: '5d'
-            }
-        );
     }
 }

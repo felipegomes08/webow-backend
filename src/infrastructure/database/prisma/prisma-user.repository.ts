@@ -57,6 +57,11 @@ export class PrismaUserRepository implements UserRepository {
         const user = await this.prisma.user.findUnique({
             where: {
                 id
+            },
+            include: {
+                userType: true,
+                accountType: true,
+                status: true
             }
         })
 
@@ -83,11 +88,22 @@ export class PrismaUserRepository implements UserRepository {
     }
 
     async findAll(page?: number, limit?: number): Promise<User[]> {
-        const users = page
-            ? await this.prisma.user.findMany({})
+        const users = !page
+            ? await this.prisma.user.findMany({
+                include: {
+                    userType: true,
+                    accountType: true,
+                    status: true
+                }
+            })
             : await this.prisma.user.findMany({
                 skip: page,
                 take: limit ?? 50,
+                include: {
+                    userType: true,
+                    accountType: true,
+                    status: true
+                }
             });
 
         return users.map(UserMapper.toDomain);

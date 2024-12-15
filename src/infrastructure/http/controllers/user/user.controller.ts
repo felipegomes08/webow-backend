@@ -144,7 +144,7 @@ export class UsersController extends BaseController {
     async getAllUserRouteHandler(req: Request, res: Response, userService: IUserService) {
         const { page, limit } = req.query as any
 
-        const [err, response] = await toResultAsync(userService.getAllUsers(page, limit))
+        const [err, response] = await toResultAsync(userService.getAllUsers(+page, +limit))
 
         if (err) {
             const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
@@ -160,6 +160,7 @@ export class UsersController extends BaseController {
             success: true,
             data: {
                 users: response.users.map(UserMapper.toController),
+                page: response.page,
                 total: response.total
             }
         })
