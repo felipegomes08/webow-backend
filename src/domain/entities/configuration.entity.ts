@@ -2,7 +2,7 @@ import {IConfiguration} from "@interfaces/configuration";
 
 export class Configuration implements IConfiguration {
     private _id?: string;
-    private _pixel: object;
+    private _pixel: string;
     private _interface: object;
     private _system: object;
     private _active: boolean;
@@ -19,7 +19,7 @@ export class Configuration implements IConfiguration {
         return this._id;
     }
 
-    get pixel(): object {
+    get pixel(): string {
         return this._pixel;
     }
 
@@ -33,5 +33,25 @@ export class Configuration implements IConfiguration {
 
     get active(): boolean {
         return this._active;
+    }
+
+    set id(value: string) {
+        this._id = value;
+    }
+
+    set pixel(value: string) {
+        this._pixel = value;
+    }
+
+    set interface(value: object) {
+        this._interface = value;
+    }
+
+    set system(value: object) {
+        this._system = value;
+    }
+
+    set active(value: boolean) {
+        this._active = value;
     }
 }

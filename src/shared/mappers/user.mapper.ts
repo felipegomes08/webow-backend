@@ -5,16 +5,19 @@ import {
     UserType as PrismaUserType,
     AccountType as PrismaAccountType,
     UserStatus as PrismaUserStatus,
+    Affiliate as PrismaAffiliate
 } from '@prisma/client'
 import {IUser} from "@interfaces/user";
 import {AccountTypeMapper} from "@shared/mappers/account-type.mapper";
 import {UserTypeMapper} from "@shared/mappers/user-type.mapper";
 import {UserStatusMapper} from "@shared/mappers/user-status.mapper";
+import {AffiliateMapper} from "@shared/mappers/affiliate.mapper";
 
 export interface PrismaUserWithJoin extends PrismaUser {
     userType?: PrismaUserType | null,
     accountType?: PrismaAccountType | null,
-    status?: PrismaUserStatus | null
+    status?: PrismaUserStatus | null,
+    affiliate: PrismaAffiliate | null,
 }
 
 export class UserMapper {
@@ -30,6 +33,10 @@ export class UserMapper {
             pixKey: data.pixKey,
             password: data.password,
             affiliateId: data.affiliateId,
+            affiliate: data.affiliate ? {
+                ...data.affiliate,
+                balance: data.affiliate.balance.toNumber()
+            } : undefined,
             accountTypeId: data.accountTypeId,
             accountType: data.accountType,
             userTypeId: data.userTypeId,
@@ -69,6 +76,7 @@ export class UserMapper {
             uf: data.uf,
             pixKey: data.pixKey,
             affiliateId: data.affiliateId,
+            affiliate: data.affiliate ? AffiliateMapper.toController(data.affiliate) : undefined,
             accountTypeId: data.accountTypeId,
             accountType: data.accountType ? AccountTypeMapper.toController(data.accountType) : null,
             userTypeId: data.userTypeId,

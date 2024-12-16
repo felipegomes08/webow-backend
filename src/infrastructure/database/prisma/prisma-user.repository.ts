@@ -14,7 +14,8 @@ export class PrismaUserRepository implements UserRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             })
         )
@@ -30,7 +31,8 @@ export class PrismaUserRepository implements UserRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             })
         )
@@ -44,7 +46,8 @@ export class PrismaUserRepository implements UserRepository {
             include: {
                 userType: true,
                 accountType: true,
-                status: true
+                status: true,
+                affiliate: true
             }
         })
 
@@ -61,7 +64,8 @@ export class PrismaUserRepository implements UserRepository {
             include: {
                 userType: true,
                 accountType: true,
-                status: true
+                status: true,
+                affiliate: true
             }
         })
 
@@ -78,7 +82,8 @@ export class PrismaUserRepository implements UserRepository {
             include: {
                 userType: true,
                 accountType: true,
-                status: true
+                status: true,
+                affiliate: true
             }
         })
 
@@ -93,7 +98,8 @@ export class PrismaUserRepository implements UserRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             })
             : await this.prisma.user.findMany({
@@ -102,7 +108,8 @@ export class PrismaUserRepository implements UserRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             });
 

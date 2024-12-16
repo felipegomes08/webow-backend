@@ -13,6 +13,7 @@ export class DatabaseSeed {
             this.prisma.transactionStatus.findMany(),
             this.prisma.userType.findMany(),
             this.prisma.userStatus.findMany(),
+            this.prisma.rouletteValue.findMany(),
         ])
 
         const cachDb = {
@@ -21,7 +22,8 @@ export class DatabaseSeed {
             matchResult: dbData[2].reduce((acc: Record<string, any>, data) => { acc[data.name] = data; return acc }, {}),
             transactionStatus: dbData[3].reduce((acc: Record<string, any>, data) => { acc[data.name] = data; return acc }, {}),
             userType: dbData[4].reduce((acc: Record<string, any>, data) => { acc[data.name] = data; return acc }, {}),
-            userStatus: dbData[5].reduce((acc: Record<string, any>, data) => { acc[data.name] = data; return acc }, {})
+            userStatus: dbData[5].reduce((acc: Record<string, any>, data) => { acc[data.name] = data; return acc }, {}),
+            rouletteValue: dbData[6].reduce((acc: Record<string, any>, data) => { acc[`${data.label}_${data.matchResultId}`] = data; return acc }, {})
         };
 
         for (const data of defaults.transactionType) {
@@ -70,6 +72,33 @@ export class DatabaseSeed {
                     data
                 });
             }
+        }
+
+        for (const data of defaults.rouletteValue) {
+            const matchResult = cachDb.matchResult[data.matchResultId];
+
+            if (!cachDb.userStatus[`${data.label}_${matchResult.id}`]) {
+                await this.prisma.rouletteValue.create({
+                    data: {
+                        matchResultId: matchResult.id,
+                        label: data.label,
+                        value: data.value
+                    }
+                });
+            }
+        }
+
+        const configurationCount = await this.prisma.configuration.count()
+
+        if (!configurationCount) {
+            await this.prisma.configuration.create({
+                data: {
+                    pixel: defaults.configuration.pixel,
+                    system: defaults.configuration.system,
+                    interface: defaults.configuration.interface,
+                    active: defaults.configuration.active
+                }
+            })
         }
 
         console.log('database seeded successfully.');

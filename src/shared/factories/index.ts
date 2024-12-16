@@ -1,3 +1,5 @@
 export * from './user-service.factory'
 export * from './auth-service.factory'
 export * from './affiliate.factory'
+export * from './configuration-service.factory'
+export * from './metadata-service.factory'

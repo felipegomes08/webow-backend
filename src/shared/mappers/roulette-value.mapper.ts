@@ -4,6 +4,7 @@ import {
 } from "@prisma/client";
 import { RouletteValue } from "@domain/entities";
 import { Decimal } from "@prisma/client/runtime/library";
+import {IRouletteValue} from "@interfaces/roulette-value";
 
 export interface RouletteValuePrismaWithJoins extends PrismaRouletteValue {
     matchResult?: PrismaMatchResult;
@@ -14,6 +15,7 @@ export class RouletteValueMapper {
         return new RouletteValue({
             id: data.id,
             matchResultId: data.matchResultId,
+            matchResult: data.matchResult,
             label: data.label,
             value: data.value.toNumber()
         });
@@ -27,13 +29,13 @@ export class RouletteValueMapper {
         };
     }
 
-    static toController(domain: RouletteValue) {
+    static toController(domain: IRouletteValue) {
         return {
             id: domain.id,
             matchResultId: domain.matchResultId,
+            matchResult: domain.matchResult,
             label: domain.label,
             value: domain.value,
-            matchResult: domain.matchResult,
         };
     }
 }

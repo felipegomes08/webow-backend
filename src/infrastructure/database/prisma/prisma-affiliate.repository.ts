@@ -65,6 +65,27 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
         return AffiliateMapper.toDomain(affiliate)
     }
 
+    async findOneByCode(code: string): Promise<Affiliate | null> {
+        const affiliate = await this.prisma.affiliate.findFirst({
+            where: {
+                code
+            },
+            include: {
+                user: {
+                    include: {
+                        userType: true,
+                        accountType: true,
+                        status: true
+                    }
+                }
+            }
+        })
+
+        if(!affiliate) return null
+
+        return AffiliateMapper.toDomain(affiliate)
+    }
+
     async findAll(page?: number, limit?: number): Promise<Affiliate[]> {
         const affiliates = !page
             ? await this.prisma.affiliate.findMany({

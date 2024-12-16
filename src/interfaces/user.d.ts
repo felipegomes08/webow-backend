@@ -1,3 +1,5 @@
+import {IAffiliate} from "@interfaces/affiliate";
+
 export interface IUserType {
     readonly id?: string;
     name: string;
@@ -26,6 +28,7 @@ export interface IUser {
     pixKey: string | null;
     password: string;
     affiliateId: string | null;
+    affiliate?: IAffiliate;
     accountTypeId: string;
     accountType?: IAccountType | null;
     userTypeId: string;

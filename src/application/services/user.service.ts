@@ -1,6 +1,6 @@
-import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUpdateUser, IUser, IAffiliateService} from "@interfaces/user";
+import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUpdateUser, IUser, IUserService} from "@interfaces/user";
 import {
-    AccountTypeRepository, RefreshTokenRepository,
+    AccountTypeRepository, AffiliateRepository, ConfigurationRepository, RefreshTokenRepository,
     UserRepository,
     UserStatusRepository,
     UserTypeRepository
@@ -15,14 +15,16 @@ import {
 } from "@domain/exceptions";
 import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
 
-export class UserService implements  IAffiliateService {
+export class UserService implements  IUserService {
 
     constructor(
         private readonly userRepository: UserRepository,
         private readonly userTypeRepository: UserTypeRepository,
         private readonly userStatusRepository: UserStatusRepository,
         private readonly accountTypeRepository: AccountTypeRepository,
-        private readonly refreshTokenRepository: RefreshTokenRepository
+        private readonly refreshTokenRepository: RefreshTokenRepository,
+        private readonly affiliateRepository: AffiliateRepository,
+        private readonly configurationRepository: ConfigurationRepository
     )
     {}
 
@@ -49,14 +51,16 @@ export class UserService implements  IAffiliateService {
             [errAccountType],
             [errUserType],
             [errUserStatus],
+            [errAffiliate]
         ] = await Promise.all([
             toResultAsync(this.validateCpf(dto.cpf, user)),
             toResultAsync(this.validateAccountType('beginner', user)),
             toResultAsync(this.validateUserType('player', user)),
-            toResultAsync(this.validateUserStatus('active', user))
+            toResultAsync(this.validateUserStatus('active', user)),
+            toResultAsync(this.validateAffiliateCode(dto.affiliateCode!, user))
         ]);
 
-        const err = errEmail || errAccountType || errUserType || errUserStatus;
+        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
 
         if (err) throw err;
 
@@ -107,14 +111,16 @@ export class UserService implements  IAffiliateService {
             [errAccountType],
             [errUserType],
             [errUserStatus],
+            [errAffiliate]
         ] = await Promise.all([
             toResultAsync(this.validateCpf(dto.cpf, user)),
             toResultAsync(this.validateAccountType(dto.accountType, user)),
             toResultAsync(this.validateUserType(dto.userType, user)),
-            toResultAsync(this.validateUserStatus(dto.status, user))
+            toResultAsync(this.validateUserStatus(dto.status, user)),
+            toResultAsync(this.validateAffiliateCode(dto.affiliateCode!, user))
         ]);
 
-        const err = errEmail || errAccountType || errUserType || errUserStatus;
+        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
 
         if (err) throw err;
 
@@ -264,6 +270,30 @@ export class UserService implements  IAffiliateService {
         }
 
         return user
+    }
+
+    async validateAffiliateCode(affiliateCode: string, user: User): Promise<User> {
+        if(!affiliateCode) {
+            return user
+        }
+
+        const affiliate = await this.affiliateRepository.findOneByCode(affiliateCode)
+
+        if (!affiliate) {
+            throw new Error('Not found affiliate')
+        }
+
+        user.affiliateId = affiliate.id!;
+        user.affiliate = affiliate;
+
+        return user
+        // const configuration = await this.configurationRepository.findUnique()
+        //
+        // if (!configuration) {
+        //     throw new Error('Not found configuration')
+        // }
+        //
+        // const affiliateCpaPercentage: number = (configuration.system as any)['CPA']['value'];
     }
 
 }

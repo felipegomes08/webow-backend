@@ -10,6 +10,8 @@ export abstract class AffiliateRepository {
 
     abstract findOneById(id: string): Promise<Affiliate | null>;
 
+    abstract findOneByCode(code: string): Promise<Affiliate | null>;
+
     abstract findAffiliatePlayers(affiliateId: string, page?: number, limit?: number): Promise<User[]>
 
     abstract countAll(): Promise<number>

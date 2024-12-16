@@ -1,5 +1,6 @@
 import { IAccountType, IUser, IUserStatus, IUserType } from "@interfaces/user";
 import bcrypt from 'bcrypt'
+import {IAffiliate} from "@interfaces/affiliate";
 
 export class User implements IUser {
     private _id: string;
@@ -11,6 +12,7 @@ export class User implements IUser {
     private _pixKey: string | null;
     private _password: string;
     private _affiliateId: string | null;
+    private _affiliate?: IAffiliate;
     private _accountTypeId: string;
     private _accountType?: IAccountType | null;
     private _userTypeId: string;
@@ -41,6 +43,7 @@ export class User implements IUser {
         this._balance = data.balance;
         this._accountType = data.accountType;
         this._userType = data.userType;
+        this._affiliate = data.affiliate;
         this._status = data.status;
         this._accessToken = data.accessToken;
         this._refreshToken = data.refreshToken;
@@ -112,6 +115,14 @@ export class User implements IUser {
 
     set affiliateId(value: string | null) {
         this._affiliateId = value;
+    }
+
+    get affiliate(): IAffiliate | undefined {
+        return this._affiliate;
+    }
+
+    set affiliate(value: IAffiliate | undefined) {
+        this._affiliate = value;
     }
 
     get accountTypeId(): string {

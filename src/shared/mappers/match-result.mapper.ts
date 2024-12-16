@@ -1,5 +1,6 @@
 import {MatchResult as PrismaMatchResult} from "@prisma/client";
 import {MatchResult} from "@domain/entities";
+import {IMatchResult} from "@interfaces/match";
 
 export class MatchResultMapper {
     static toDomain(data: PrismaMatchResult): MatchResult {
@@ -17,7 +18,7 @@ export class MatchResultMapper {
         };
     }
 
-    static toController(data: MatchResult) {
+    static toController(data: IMatchResult) {
         return {
             id: data.id,
             name: data.name,

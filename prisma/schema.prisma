@@ -37,7 +37,7 @@ model MatchResult {
 
 model Configuration {
   id        String  @id @default(uuid()) @db.Uuid
-  pixel     Json
+  pixel     String
   interface Json
   system    Json
   active    Boolean @default(true)

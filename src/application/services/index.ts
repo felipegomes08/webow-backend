@@ -1,3 +1,5 @@
 export * from './user.service'
 export * from './auth.service'
 export * from './affiliate.service'
+export * from './configuration.service'
+export * from './metadata.service'

@@ -1,2 +1,5 @@
 export * from './user/user.controller'
 export * from './auth/auth.controller'
+export * from './affiliate/affiliate.controller'
+export * from './configuration/configuration.controller'
+export * from './metadata/metadata.controller'
