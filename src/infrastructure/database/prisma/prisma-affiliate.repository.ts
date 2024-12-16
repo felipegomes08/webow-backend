@@ -125,7 +125,8 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             })
             : await this.prisma.user.findMany({
@@ -137,7 +138,8 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
                 include: {
                     userType: true,
                     accountType: true,
-                    status: true
+                    status: true,
+                    affiliate: true
                 }
             });
 
