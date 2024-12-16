@@ -1,20 +1,24 @@
 import {PrismaClient} from "@prisma/client";
 import {FastifyAdapter} from "@infrastructure/http/adapters";
-import {authServiceFactory, userServiceFactory} from "@shared/factories";
+import {affiliateServiceFactory, authServiceFactory, userServiceFactory} from "@shared/factories";
 import {AuthController, UsersController} from "@infrastructure/http/controllers";
+import {AffiliateController} from "@infrastructure/http/controllers/affiliate/affiliate.controller";
 
 export async function bootstrap(prisma: PrismaClient) {
     const httpServer = new FastifyAdapter()
 
     const userService = userServiceFactory(prisma)
     const authService = authServiceFactory(prisma);
+    const affiliateService = affiliateServiceFactory(prisma);
 
     const userController = new UsersController(httpServer.fastify, userService)
     const authController = new AuthController(httpServer.fastify, authService)
+    const affiliateController = new AffiliateController(httpServer.fastify, affiliateService)
 
     await httpServer
-        .addController(userController)
         .addController(authController)
+        .addController(userController)
+        .addController(affiliateController)
         .start()
 
     const shutdown = async (signal: string) => {

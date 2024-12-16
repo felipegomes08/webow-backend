@@ -32,16 +32,32 @@ export class Affiliate implements IAffiliate {
         return this._code;
     }
 
+    set code(value: string) {
+        this._code = value;
+    }
+
     get userId(): string {
         return this._userId;
+    }
+
+    set userId(value: string) {
+        this._userId = value;
     }
 
     get link(): string {
         return this._link;
     }
 
+    set link(value: string) {
+        this._link = value;
+    }
+
     get balance(): number {
         return this._balance;
+    }
+
+    set balance(value: number) {
+        this._balance = value;
     }
 
     get createdAt(): Date {
@@ -54,6 +70,10 @@ export class Affiliate implements IAffiliate {
 
     get active(): boolean {
         return this._active;
+    }
+
+    set active(value: boolean) {
+        this._active = value;
     }
 
     get user(): IUser | undefined {

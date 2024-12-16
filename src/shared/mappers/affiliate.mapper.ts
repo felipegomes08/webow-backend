@@ -1,6 +1,7 @@
 import { Affiliate as PrismaAffiliate, User as PrismaUser } from "@prisma/client";
 import { Affiliate } from "@domain/entities";
 import { Decimal } from "@prisma/client/runtime/library";
+import {IAffiliate} from "@interfaces/affiliate";
 
 export interface AffiliatePrismaWithJoins extends PrismaAffiliate {
     user: PrismaUser;
@@ -36,7 +37,7 @@ export class AffiliateMapper {
         };
     }
 
-    static toController(domain: Affiliate) {
+    static toController(domain: IAffiliate) {
         return {
             id: domain.id,
             code: domain.code,

@@ -1,38 +1,40 @@
-import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUpdateUser, IUser, IAffiliateService} from "@interfaces/user";
 import {
-    AccountTypeRepository, RefreshTokenRepository,
+    AccountTypeRepository, AffiliateRepository,
+    RefreshTokenRepository,
     UserRepository,
     UserStatusRepository,
     UserTypeRepository
 } from "@domain/repositories";
-import {RefreshToken, User} from "@domain/entities";
-import {toResultAsync} from "@shared/utils";
+import {IAffiliate, IAffiliateService, ICreateAffiliate} from "@interfaces/affiliate";
+import {Affiliate, RefreshToken, User} from "@domain/entities";
 import {
     CpfAlreadyExistsException,
     InvalidAccountTypeException,
     InvalidUserStatusException,
-    InvalidUserTypeException
+    InvalidUserTypeException, NotFoundUserException
 } from "@domain/exceptions";
+import {toResultAsync} from "@shared/utils";
 import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
 
-export class UserService implements  IAffiliateService {
+export class AffiliateService implements IAffiliateService{
 
     constructor(
         private readonly userRepository: UserRepository,
         private readonly userTypeRepository: UserTypeRepository,
         private readonly userStatusRepository: UserStatusRepository,
         private readonly accountTypeRepository: AccountTypeRepository,
-        private readonly refreshTokenRepository: RefreshTokenRepository
+        private readonly refreshTokenRepository: RefreshTokenRepository,
+        private readonly affiliateRepository: AffiliateRepository
     )
     {}
 
-    async registerUser(dto: IRegisterUser) {
+    async createAffiliate(dto: ICreateAffiliate) {
         const user = new User({
             name: dto.name ?? "",
             cpf: dto.cpf,
             phone: dto.phone,
             email: dto.email ?? "",
-            uf: dto.uf ?? "",
+            uf: "",
             pixKey: dto.pixKey ?? "",
             password: dto.password,
             affiliateId: null,
@@ -52,7 +54,7 @@ export class UserService implements  IAffiliateService {
         ] = await Promise.all([
             toResultAsync(this.validateCpf(dto.cpf, user)),
             toResultAsync(this.validateAccountType('beginner', user)),
-            toResultAsync(this.validateUserType('player', user)),
+            toResultAsync(this.validateUserType('affiliate', user)),
             toResultAsync(this.validateUserStatus('active', user))
         ]);
 
@@ -78,131 +80,70 @@ export class UserService implements  IAffiliateService {
             })
         )
 
-        userCreated.accessToken = accessToken
-        userCreated.refreshToken = refreshToken;
-
-        return userCreated;
-    }
-
-    async createUser(dto: ICreateUser): Promise<IUser> {
-        const user = new User({
-            name: dto.name,
-            cpf: dto.cpf,
-            phone: dto.phone,
-            email: dto.email,
-            uf: dto.uf,
-            pixKey: dto.pixKey,
-            password: dto.password,
-            affiliateId: null,
-            accountTypeId: "",
-            userTypeId: "",
-            statusId: "",
-            balance: 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-
-        const [
-            [errEmail],
-            [errAccountType],
-            [errUserType],
-            [errUserStatus],
-        ] = await Promise.all([
-            toResultAsync(this.validateCpf(dto.cpf, user)),
-            toResultAsync(this.validateAccountType(dto.accountType, user)),
-            toResultAsync(this.validateUserType(dto.userType, user)),
-            toResultAsync(this.validateUserStatus(dto.status, user))
-        ]);
-
-        const err = errEmail || errAccountType || errUserType || errUserStatus;
-
-        if (err) throw err;
-
-        const refreshToken = generateJwtToken(user, '7d');
-        const accessToken = generateJwtToken(user, '15m');
-
-        user.hashPassword()
-
-        const userCreated = await this.userRepository.create(user)
-
-        await this.refreshTokenRepository.create(
-            new RefreshToken({
-                token: refreshToken,
-                userId: userCreated.id,
-                expiresAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
-                revoked: false,
+        const affiliateCreated = await this.affiliateRepository.create(
+            new Affiliate({
+                userId: userCreated.id!,
+                code: dto.code,
+                link: dto.link ?? "",
+                balance: 0,
+                active: true,
                 createdAt: new Date(),
                 updatedAt: new Date()
             })
         )
 
-        userCreated.accessToken = accessToken
-        userCreated.refreshToken = refreshToken;
+        affiliateCreated.user!.accessToken = accessToken
+        affiliateCreated.user!.refreshToken = refreshToken;
 
-        return userCreated;
+        return affiliateCreated;
     }
 
-    async deleteUser(id: string): Promise<void> {
-        const user = await this.userRepository.findOneById(id);
+    async getAllAffiliates(page?: number, limit?: number) {
+        const affiliates = await this.affiliateRepository.findAll(page, limit);
+        const total = await this.affiliateRepository.countAll();
 
-        if (!user) {
-            throw new Error('Not found user')
+        return {
+            affiliates,
+            page: page ?? null,
+            total
         }
-
-        const status = await this.userStatusRepository.findOneByName('inactive');
-
-        if (!status) {
-            throw new Error('Not found user status')
-        }
-
-        user.statusId = status.id!;
-
-        const refreshToken = await this.refreshTokenRepository.findOneByUserId(user.id);
-
-        if (!refreshToken) {
-            throw new Error('Not found refresh token')
-        }
-
-        refreshToken.revoked = true;
-
-        await this.refreshTokenRepository.update(refreshToken.id!, refreshToken);
     }
 
-    async updateUser(id: string, data: IUpdateUser): Promise<IUser> {
-        const user = await this.userRepository.findOneById(id);
-
-        if (!user) {
-            throw new Error('Not found user')
-        }
-
-        Object.assign(user, data)
-
-        if (data.password) {
-            user.hashPassword()
-        }
-
-        return await this.userRepository.update(id, user)
-    }
-
-    async getUserById(id: string): Promise<IUser | null> {
-        const user = await this.userRepository.findOneById(id);
-
-        if (!user) {
-            throw new Error('Not found user');
-        }
-
-        return user;
-    }
-
-    async getAllUsers(page?: number, limit?: number): Promise<IGetAllUsersResponse> {
-        const users = await this.userRepository.findAll(page, limit);
-        const countAllUsers = await this.userRepository.count();
+    async getAffiliatePlayers(affiliateId: string, page?: number, limit?: number) {
+        const users = await this.affiliateRepository.findAffiliatePlayers(affiliateId, page, limit);
+        const total = await this.affiliateRepository.countAllAffiliatePlayers(affiliateId);
 
         return {
             users,
             page: page ?? null,
-            total: countAllUsers
+            total
         }
+    }
+
+    async updateAffiliate(id: string, dto: IAffiliate) {
+        const affiliate = await this.affiliateRepository.findOneById(id)
+
+        if (!affiliate) {
+            throw new NotFoundUserException()
+        }
+
+        Object.assign(affiliate, dto)
+
+        return await this.affiliateRepository.update(id, affiliate)
+    }
+
+    async deleteAffiliate(id: string) {
+        const affiliate = await this.affiliateRepository.findOneById(id)
+
+        if (!affiliate) {
+            throw new NotFoundUserException()
+        }
+
+        affiliate.active = false;
+
+        await this.affiliateRepository.update(id, affiliate);
+
+        return;
     }
 
     async validateUserType(userType: string, user: User): Promise<User> {
