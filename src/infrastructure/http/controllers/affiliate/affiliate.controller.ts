@@ -1,7 +1,7 @@
 import type { Response, Request } from '@interfaces/http'
 import { BaseController } from "../base.controller";
 import {IAffiliateService} from "@interfaces/affiliate";
-import {toResultAsync} from "@shared/utils";
+import {convertQueryParams, toResultAsync} from "@shared/utils";
 import {AffiliateMapper, UserMapper} from "@shared/mappers";
 import {FastifyInstance} from "fastify";
 import {CreateAffiliateDto, UpdateAffiliateDto} from "@infrastructure/http/controllers/affiliate/dto";
@@ -92,9 +92,9 @@ export class AffiliateController extends BaseController {
     }
 
     async getAllAffiliatesRouteHandler(req: Request, res: Response, affiliateService: IAffiliateService) {
-        const { page, limit } = req.query as any
+        const queryParams = convertQueryParams(req.query as any)
 
-        const [err, response] = await toResultAsync(affiliateService.getAllAffiliates(+page, +limit))
+        const [err, response] = await toResultAsync(affiliateService.getAllAffiliates(queryParams))
 
         if (err) {
             const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
@@ -118,9 +118,9 @@ export class AffiliateController extends BaseController {
 
     async getAllAffiliatePlayersRouteHandler(req: Request, res: Response, affiliateService: IAffiliateService) {
         const { id } = req.params as any
-        const { page, limit } = req.query as any
+        const queryParams = convertQueryParams(req.query as any)
 
-        const [err, response] = await toResultAsync(affiliateService.getAffiliatePlayers(id, +page, +limit))
+        const [err, response] = await toResultAsync(affiliateService.getAffiliatePlayers(id, queryParams))
 
         if (err) {
             const message = !err.httpStatusCode ? 'Internal Server Error' : err.message

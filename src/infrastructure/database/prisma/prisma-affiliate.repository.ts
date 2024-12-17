@@ -2,6 +2,9 @@ import {AffiliateRepository} from "@domain/repositories";
 import {PrismaClient} from "@prisma/client";
 import {Affiliate, User} from "@domain/entities";
 import {AffiliateMapper, UserMapper} from "@shared/mappers";
+import {IGetAllAffiliateParams} from "@interfaces/affiliate";
+import {transformGetAllAffiliatesParams, transformGetAllUsersParams} from "@shared/utils";
+import {IGetAllUsersParams} from "@interfaces/user";
 
 export class PrismaAffiliateRepository implements AffiliateRepository {
 
@@ -86,9 +89,12 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
         return AffiliateMapper.toDomain(affiliate)
     }
 
-    async findAll(page?: number, limit?: number): Promise<Affiliate[]> {
-        const affiliates = !page
+    async findAll(params: IGetAllAffiliateParams): Promise<Affiliate[]> {
+        const matchParams = transformGetAllAffiliatesParams(params)
+
+        const affiliates = !params.page
             ? await this.prisma.affiliate.findMany({
+                where: matchParams,
                 include: {
                     user: {
                         include: {
@@ -100,8 +106,9 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
                 }
             })
             : await this.prisma.affiliate.findMany({
-                skip: (page - 1) * (limit ?? 25),
-                take: limit ?? 25,
+                where: matchParams,
+                skip: (params.page - 1) * (params.limit ?? 25),
+                take: params.limit ?? 25,
                 include: {
                     user: {
                         include: {
@@ -116,11 +123,14 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
         return affiliates.map(AffiliateMapper.toDomain);
     }
 
-    async findAffiliatePlayers(affiliateId: string, page?: number, limit?: number): Promise<User[]> {
-        const users = !page
+    async findAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams): Promise<User[]> {
+        const matchParams = transformGetAllUsersParams(params)
+
+        const users = !params.page
             ? await this.prisma.user.findMany({
                 where: {
-                    affiliateId
+                    affiliateId,
+                    ...matchParams
                 },
                 include: {
                     userType: true,
@@ -131,10 +141,11 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
             })
             : await this.prisma.user.findMany({
                 where: {
-                    affiliateId
+                    affiliateId,
+                    ...matchParams
                 },
-                skip: (page - 1) * (limit ?? 25),
-                take: limit ?? 25,
+                skip: (params.page - 1) * (params.limit ?? 25),
+                take: params.limit ?? 25,
                 include: {
                     userType: true,
                     accountType: true,

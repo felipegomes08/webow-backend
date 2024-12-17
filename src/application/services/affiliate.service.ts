@@ -5,7 +5,7 @@ import {
     UserStatusRepository,
     UserTypeRepository
 } from "@domain/repositories";
-import {IAffiliate, IAffiliateService, ICreateAffiliate} from "@interfaces/affiliate";
+import {IAffiliate, IAffiliateService, ICreateAffiliate, IGetAllAffiliateParams} from "@interfaces/affiliate";
 import {Affiliate, RefreshToken, User} from "@domain/entities";
 import {
     CpfAlreadyExistsException,
@@ -15,6 +15,7 @@ import {
 } from "@domain/exceptions";
 import {toResultAsync} from "@shared/utils";
 import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
+import {IGetAllUsersParams} from "@interfaces/user";
 
 export class AffiliateService implements IAffiliateService{
 
@@ -98,24 +99,24 @@ export class AffiliateService implements IAffiliateService{
         return affiliateCreated;
     }
 
-    async getAllAffiliates(page?: number, limit?: number) {
-        const affiliates = await this.affiliateRepository.findAll(page, limit);
+    async getAllAffiliates(params: IGetAllAffiliateParams) {
+        const affiliates = await this.affiliateRepository.findAll(params);
         const total = await this.affiliateRepository.countAll();
 
         return {
             affiliates,
-            page: page ?? null,
+            page: params.page ?? null,
             total
         }
     }
 
-    async getAffiliatePlayers(affiliateId: string, page?: number, limit?: number) {
-        const users = await this.affiliateRepository.findAffiliatePlayers(affiliateId, page, limit);
+    async getAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams) {
+        const users = await this.affiliateRepository.findAffiliatePlayers(affiliateId, params);
         const total = await this.affiliateRepository.countAllAffiliatePlayers(affiliateId);
 
         return {
             users,
-            page: page ?? null,
+            page: params.page ?? null,
             total
         }
     }
