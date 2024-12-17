@@ -87,11 +87,37 @@ export interface IGetAllUsersResponse {
     total: number;
 }
 
+export interface IRangeParam<T> {
+    lt?: T,
+    lte?: T,
+    gt?: T,
+    gte?: T,
+}
+
+export interface IGetAllUsersParams {
+    id?: string;
+    name?: string;
+    cpf?: string;
+    phone?: string;
+    email?: string;
+    uf?: string;
+    pixKey?: string;
+    affiliateCode?: string;
+    accountType?: string;
+    userType?: string;
+    balance?: IRangeParam<number>;
+    status?: string;
+    createdAt?: IRangeParam<Date>;
+    updatedAt?: IRangeParam<Date>;
+    page?: number;
+    limit?: number;
+}
+
 export interface IUserService {
 
     registerUser(dto: IRegisterUser): Promise<IUser>;
 
-    getAllUsers(page?: number, limit?: number): Promise<IGetAllUsersResponse>;
+    getAllUsers(params: IGetAllUsersParams): Promise<IGetAllUsersResponse>;
 
     getUserById(id: string): Promise<IUser | null>;
 

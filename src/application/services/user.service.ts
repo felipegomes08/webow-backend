@@ -1,4 +1,12 @@
-import {ICreateUser, IGetAllUsersResponse, IRegisterUser, IUpdateUser, IUser, IUserService} from "@interfaces/user";
+import {
+    ICreateUser,
+    IGetAllUsersParams,
+    IGetAllUsersResponse,
+    IRegisterUser,
+    IUpdateUser,
+    IUser,
+    IUserService
+} from "@interfaces/user";
 import {
     AccountTypeRepository, AffiliateRepository, ConfigurationRepository, RefreshTokenRepository,
     UserRepository,
@@ -200,13 +208,13 @@ export class UserService implements  IUserService {
         return user;
     }
 
-    async getAllUsers(page?: number, limit?: number): Promise<IGetAllUsersResponse> {
-        const users = await this.userRepository.findAll(page, limit);
+    async getAllUsers(params: IGetAllUsersParams): Promise<IGetAllUsersResponse> {
+        const users = await this.userRepository.findAll(params);
         const countAllUsers = await this.userRepository.count();
 
         return {
             users,
-            page: page ?? null,
+            page: params.page ?? null,
             total: countAllUsers
         }
     }

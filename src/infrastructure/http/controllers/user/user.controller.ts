@@ -2,7 +2,7 @@ import type { Response, Request } from '@interfaces/http'
 import { BaseController } from "../base.controller";
 import {IUserService} from "@interfaces/user";
 import {CreateUserDto, RegisterUserDto, UpdateUserDto} from "./dto";
-import {toResultAsync} from "@shared/utils";
+import {convertQueryParams, toResultAsync} from "@shared/utils";
 import {UserMapper} from "@shared/mappers";
 import {FastifyInstance} from "fastify";
 
@@ -142,9 +142,9 @@ export class UsersController extends BaseController {
     }
 
     async getAllUserRouteHandler(req: Request, res: Response, userService: IUserService) {
-        const { page, limit } = req.query as any
+        const params = convertQueryParams(req.query as any)
 
-        const [err, response] = await toResultAsync(userService.getAllUsers(+page, +limit))
+        const [err, response] = await toResultAsync(userService.getAllUsers(params))
 
         if (err) {
             const message = !err.httpStatusCode ? 'Internal Server Error' : err.message

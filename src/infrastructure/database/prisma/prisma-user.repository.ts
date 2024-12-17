@@ -2,6 +2,8 @@ import {UserRepository} from "@domain/repositories";
 import {User} from "@domain/entities";
 import {UserMapper} from "@shared/mappers";
 import {PrismaClient} from "@prisma/client";
+import {IGetAllUsersParams} from "@interfaces/user";
+import {transformGetAllUsersParams} from "@shared/utils";
 
 export class PrismaUserRepository implements UserRepository {
 
@@ -92,9 +94,12 @@ export class PrismaUserRepository implements UserRepository {
         return UserMapper.toDomain(user)
     }
 
-    async findAll(page?: number, limit?: number): Promise<User[]> {
-        const users = !page
+    async findAll(params: IGetAllUsersParams): Promise<User[]> {
+        const matchParams = transformGetAllUsersParams(params)
+
+        const users = !params?.page
             ? await this.prisma.user.findMany({
+                where: matchParams,
                 include: {
                     userType: true,
                     accountType: true,
@@ -103,8 +108,9 @@ export class PrismaUserRepository implements UserRepository {
                 }
             })
             : await this.prisma.user.findMany({
-                skip: (page - 1) * (limit ?? 25),
-                take: limit ?? 25,
+                where: matchParams,
+                skip: (params.page - 1) * (params?.limit ?? 25),
+                take: params?.limit ?? 25,
                 include: {
                     userType: true,
                     accountType: true,

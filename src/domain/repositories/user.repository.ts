@@ -1,4 +1,5 @@
 import {User} from "@domain/entities";
+import {IGetAllUsersParams} from "@interfaces/user";
 
 export abstract class UserRepository {
 
@@ -12,7 +13,7 @@ export abstract class UserRepository {
 
     abstract findOneByCpf(cpf: string): Promise<User | null>
 
-    abstract findAll(page?: number, limit?: number): Promise<User[]>
+    abstract findAll(params: IGetAllUsersParams): Promise<User[]>
 
     abstract count(): Promise<number>
 }
