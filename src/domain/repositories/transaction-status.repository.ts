@@ -6,4 +6,6 @@ export abstract class TransactionStatusRepository {
 
     abstract findOneById(id: string): Promise<TransactionStatus | null>
 
+    abstract findByName(name: string): Promise<TransactionStatus | null>
+
 }

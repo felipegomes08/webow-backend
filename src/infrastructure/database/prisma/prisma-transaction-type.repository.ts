@@ -26,4 +26,16 @@ export class PrismaTransactionTypeRepository implements TransactionTypeRepositor
         return TransactionTypeMapper.toDomain(type)
     }
 
+    async findByName(name: string): Promise<TransactionType | null> {
+        const type = await this.prisma.transactionType.findFirst({
+            where: {
+                name
+            }
+        })
+
+        if (!type) return null
+
+        return TransactionTypeMapper.toDomain(type)
+    }
+
 }

@@ -11,17 +11,21 @@ export default {
   ],
   transactionStatus: [
     {
-      name: "pending",
-      label: "Pendente"
+      name: "waitingPayment",
+      label: "Aguardando Pagamento"
     },
     {
-      name: "approved",
-      label: "Aprovado"
+      name: "finished",
+      label: "Concluída"
     },
     {
-      name: "denied",
-      label: "Negado"
-    }
+      name: "canceled",
+      label: "Cancelado"
+    },
+    {
+      name: "processing",
+      label: "Em Processamento"
+    },
   ],
   matchResult: [
     {

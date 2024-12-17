@@ -34,7 +34,7 @@ export class TransactionMapper {
         });
     }
 
-    static toPrisma(data: Transaction): Omit<PrismaTransaction, "id"> {
+    static toPrisma(data: ITransaction): Omit<PrismaTransaction, "id"> {
         return {
             userId: data.userId,
             typeId: data.typeId,

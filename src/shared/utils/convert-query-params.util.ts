@@ -10,7 +10,7 @@ export function convertQueryParams(query: QueryParams): ConvertedField {
 
             if (operator) {
                 result[field] = result[field] || {};
-                result[field][operator] = query[key] as string;
+                result[field][operator] = query[key];
             } else {
                 switch (field) {
                     case 'page':

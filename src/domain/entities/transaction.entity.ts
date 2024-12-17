@@ -1,5 +1,5 @@
-import {IUser} from "@interfaces/user";
-import {ITransaction, ITransactionStatus, ITransactionType} from "@interfaces/transaction";
+import { IUser } from "@interfaces/user";
+import { ITransaction, ITransactionStatus, ITransactionType } from "@interfaces/transaction";
 
 export class Transaction {
     private _id?: string;
@@ -28,6 +28,7 @@ export class Transaction {
         this._status = data.status;
     }
 
+    // Getters
     public get id(): string | undefined {
         return this._id;
     }
@@ -72,8 +73,37 @@ export class Transaction {
         return this._status;
     }
 
+    // Setters
     public set id(value: string | undefined) {
         this._id = value;
+    }
+
+    public set userId(value: string) {
+        this._userId = value;
+    }
+
+    public set typeId(value: string) {
+        this._typeId = value;
+    }
+
+    public set statusId(value: string) {
+        this._statusId = value;
+    }
+
+    public set pixKey(value: string) {
+        this._pixKey = value;
+    }
+
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    public set updatedAt(value: Date) {
+        this._updatedAt = value;
+    }
+
+    public set amount(value: number) {
+        this._amount = value;
     }
 
     public set user(value: IUser | undefined) {

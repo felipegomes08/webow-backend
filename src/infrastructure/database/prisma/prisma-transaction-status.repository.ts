@@ -26,4 +26,16 @@ export class PrismaTransactionStatusRepository implements TransactionStatusRepos
         return TransactionStatusMapper.toDomain(type)
     }
 
+    async findByName(name: string): Promise<TransactionStatus | null> {
+        const type = await this.prisma.transactionStatus.findFirst({
+            where: {
+                name
+            }
+        })
+
+        if (!type) return null
+
+        return TransactionStatusMapper.toDomain(type)
+    }
+
 }

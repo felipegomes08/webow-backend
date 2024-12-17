@@ -6,4 +6,5 @@ export abstract class TransactionTypeRepository {
 
     abstract findOneById(id: string): Promise<TransactionType | null>
 
+    abstract findByName(name: string): Promise<TransactionType | null>
 }
