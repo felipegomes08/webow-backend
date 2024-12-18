@@ -101,7 +101,7 @@ export class AffiliateService implements IAffiliateService{
 
     async getAllAffiliates(params: IGetAllAffiliateParams) {
         const affiliates = await this.affiliateRepository.findAll(params);
-        const total = await this.affiliateRepository.countAll();
+        const total = await this.affiliateRepository.countAll(params);
 
         return {
             affiliates,
@@ -112,7 +112,7 @@ export class AffiliateService implements IAffiliateService{
 
     async getAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams) {
         const users = await this.affiliateRepository.findAffiliatePlayers(affiliateId, params);
-        const total = await this.affiliateRepository.countAllAffiliatePlayers(affiliateId);
+        const total = await this.affiliateRepository.countAllAffiliatePlayers(affiliateId, params);
 
         return {
             users,

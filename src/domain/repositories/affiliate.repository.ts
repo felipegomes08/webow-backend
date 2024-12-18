@@ -16,7 +16,7 @@ export abstract class AffiliateRepository {
 
     abstract findAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams): Promise<User[]>
 
-    abstract countAll(): Promise<number>
+    abstract countAll(params: IGetAllAffiliateParams): Promise<number>
 
-    abstract countAllAffiliatePlayers(affiliateId: string): Promise<number>
+    abstract countAllAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams): Promise<number>
 }

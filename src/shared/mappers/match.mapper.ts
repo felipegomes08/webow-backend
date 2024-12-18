@@ -5,6 +5,7 @@ import {
 } from "@prisma/client";
 import { Match } from "@domain/entities";
 import {Decimal} from "@prisma/client/runtime/library";
+import {IMatch} from "@interfaces/match";
 
 export interface MatchPrismaWithJoins extends PrismaMatch {
     user: PrismaUser;
@@ -27,7 +28,7 @@ export class MatchMapper {
         });
     }
 
-    static toPrisma(domain: Match): Omit<PrismaMatch, "id"> {
+    static toPrisma(domain: IMatch): Omit<PrismaMatch, "id"> {
         return {
             userId: domain.userId,
             matchResultId: domain.matchResultId,
@@ -36,7 +37,7 @@ export class MatchMapper {
         };
     }
 
-    static toController(domain: Match) {
+    static toController(domain: IMatch) {
         return {
             id: domain.id,
             userId: domain.userId,

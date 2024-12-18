@@ -15,5 +15,5 @@ export abstract class UserRepository {
 
     abstract findAll(params: IGetAllUsersParams): Promise<User[]>
 
-    abstract count(): Promise<number>
+    abstract count(params: IGetAllUsersParams): Promise<number>
 }

@@ -210,7 +210,7 @@ export class UserService implements  IUserService {
 
     async getAllUsers(params: IGetAllUsersParams): Promise<IGetAllUsersResponse> {
         const users = await this.userRepository.findAll(params);
-        const countAllUsers = await this.userRepository.count();
+        const countAllUsers = await this.userRepository.count(params);
 
         return {
             users,

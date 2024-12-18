@@ -3,12 +3,12 @@ import {FastifyAdapter} from "@infrastructure/http/adapters";
 import {
     affiliateServiceFactory,
     authServiceFactory,
-    configurationServiceFactory, metadataServiceFactory, transactionServiceFactory,
+    configurationServiceFactory, matchServiceFactory, metadataServiceFactory, transactionServiceFactory,
     userServiceFactory
 } from "@shared/factories";
 import {
     AuthController,
-    ConfigurationController,
+    ConfigurationController, MatchController,
     MetadataController, TransactionController,
     UsersController
 } from "@infrastructure/http/controllers";
@@ -23,6 +23,7 @@ export async function bootstrap(prisma: PrismaClient) {
     const configurationService = configurationServiceFactory(prisma);
     const metadataService = metadataServiceFactory(prisma);
     const transactionService = transactionServiceFactory(prisma);
+    const matchService = matchServiceFactory(prisma);
 
     const userController = new UsersController(httpServer.fastify, userService)
     const authController = new AuthController(httpServer.fastify, authService)
@@ -30,6 +31,7 @@ export async function bootstrap(prisma: PrismaClient) {
     const configurationController = new ConfigurationController(httpServer.fastify, configurationService)
     const metadataController = new MetadataController(httpServer.fastify, metadataService)
     const transactionController = new TransactionController(httpServer.fastify, transactionService)
+    const matchController = new MatchController(httpServer.fastify, matchService)
 
     await httpServer
         .addController(authController)
@@ -38,6 +40,7 @@ export async function bootstrap(prisma: PrismaClient) {
         .addController(configurationController)
         .addController(metadataController)
         .addController(transactionController)
+        .addController(matchController)
         .start()
 
     const shutdown = async (signal: string) => {

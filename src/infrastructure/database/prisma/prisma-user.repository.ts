@@ -122,8 +122,10 @@ export class PrismaUserRepository implements UserRepository {
         return users.map(UserMapper.toDomain);
     }
 
-    async count(): Promise<number> {
-        return await this.prisma.user.count();
+    async count(params: IGetAllUsersParams): Promise<number> {
+        return await this.prisma.user.count({
+            where: transformGetAllUsersParams(params)
+        });
     }
 
 }

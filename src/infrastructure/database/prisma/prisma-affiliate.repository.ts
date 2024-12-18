@@ -157,14 +157,17 @@ export class PrismaAffiliateRepository implements AffiliateRepository {
         return users.map(UserMapper.toDomain);
     }
 
-    async countAll(): Promise<number> {
-        return await this.prisma.affiliate.count();
+    async countAll(params: IGetAllAffiliateParams): Promise<number> {
+        return await this.prisma.affiliate.count({
+            where: transformGetAllAffiliatesParams(params)
+        });
     }
 
-    async countAllAffiliatePlayers(affiliateId: string): Promise<number> {
+    async countAllAffiliatePlayers(affiliateId: string, params: IGetAllUsersParams): Promise<number> {
         return await this.prisma.user.count({
             where: {
-                affiliateId
+                affiliateId,
+                ...transformGetAllUsersParams(params)
             }
         })
     }
