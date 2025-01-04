@@ -19,7 +19,8 @@ const ufSchema = z
     .toUpperCase()
     .refine((uf) => validUFs.includes(uf), {
         message: "A UF deve ser válida, como SP, RJ, MG, etc.",
-    });
+    })
+    .optional();
 
 const cpfPixRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 const cnpjPixRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
@@ -39,13 +40,14 @@ const pixKeySchema = z
         {
             message: "A chave PIX deve ser um CPF, CNPJ, e-mail, telefone ou chave aleatória válida.",
         }
-    );
+    )
+    .optional();
 
 export const CreateUserDto = z.object({
-    name: z.string().min(4, "O nome deve ter pelo menos 4 caracteres"),
+    name: z.string().min(4, "O nome deve ter pelo menos 4 caracteres").optional(),
     cpf: z.string().length(11),
     phone: z.string().min(9),
-    email: z.string().email("O email informado não é válido"),
+    email: z.string().email("O email informado não é válido").optional(),
     uf: ufSchema,
     pixKey: pixKeySchema,
     affiliateCode: z.string().optional(),
