@@ -189,8 +189,18 @@ export class UserService implements  IUserService {
             throw new Error('Not found user')
         }
 
-        if (data.userType === 'administrator') {
-            throw new InvalidUserTypeException();
+        if (['player', 'affiliate'].includes(user.userType!.name)) {
+            if (data.userType) {
+                throw new InvalidUserTypeException()
+            }
+
+            if (data.status) {
+                throw new InvalidUserStatusException()
+            }
+
+            if (data.accountType) {
+                throw new InvalidAccountTypeException()
+            }
         }
 
         Object.assign(user, data)
