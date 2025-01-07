@@ -110,18 +110,16 @@ export class UsersController extends BaseController {
             readFileSync('certs/private.key')
         )
 
-        if (['player', 'affiliate'].includes((requesterData as any).userType)) {
-            if (data.userType) {
-                throw new InvalidUserTypeException()
-            }
+        const [validateErr] = await toResultAsync(this.validateAccess((requesterData as any).userType, data))
 
-            if (data.status) {
-                throw new InvalidUserStatusException()
-            }
-
-            if (data.accountType) {
-                throw new InvalidAccountTypeException()
-            }
+        if (validateErr) {
+            const message = !validateErr.httpStatusCode ? 'Internal Server Error' : validateErr.message
+            const statusCode = validateErr.httpStatusCode ?? 500
+            console.error(validateErr)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
         }
 
         const [err, user] = await toResultAsync(userService.updateUser(userId, data))
@@ -186,6 +184,22 @@ export class UsersController extends BaseController {
                 total: response.total
             }
         })
+    }
+
+    async validateAccess(userType: string, data: any) {
+        if (['player', 'affiliate'].includes(userType)) {
+            if (data.userType) {
+                throw new InvalidUserTypeException()
+            }
+
+            if (data.status) {
+                throw new InvalidUserStatusException()
+            }
+
+            if (data.accountType) {
+                throw new InvalidAccountTypeException()
+            }
+        }
     }
 
 }
