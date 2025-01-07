@@ -191,6 +191,24 @@ export class UserService implements  IUserService {
 
         Object.assign(user, data)
 
+        const [
+            [errEmail],
+            [errAccountType],
+            [errUserType],
+            [errUserStatus],
+            [errAffiliate]
+        ] = await Promise.all([
+            toResultAsync(this.validateCpf(data.cpf!, user)),
+            toResultAsync(this.validateAccountType(data.accountType!, user, false)),
+            toResultAsync(this.validateUserType(data.userType!, user, false)),
+            toResultAsync(this.validateUserStatus(data.status!, user, false)),
+            toResultAsync(this.validateAffiliateCode(data.affiliateCode!, user))
+        ]);
+
+        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
+
+        if (err) throw err;
+
         if (data.password) {
             user.hashPassword()
         }
@@ -219,9 +237,13 @@ export class UserService implements  IUserService {
         }
     }
 
-    async validateUserType(userType: string, user: User): Promise<User> {
+    async validateUserType(userType: string, user: User, required: boolean = true): Promise<User> {
         if (!userType) {
-            throw new InvalidUserTypeException()
+            if (required) {
+                throw new InvalidUserTypeException()
+            }
+
+            return user;
         }
 
         const userTypeRegister = await this.userTypeRepository.findOneByName(userType);
@@ -236,9 +258,13 @@ export class UserService implements  IUserService {
         return user
     }
 
-    async validateAccountType(accountType: string, user: User): Promise<User> {
+    async validateAccountType(accountType: string, user: User, required: boolean = true): Promise<User> {
         if (!accountType) {
-            throw new InvalidAccountTypeException()
+            if (required) {
+                throw new InvalidAccountTypeException()
+            }
+
+            return user
         }
 
         const accountTypeRegister = await this.accountTypeRepository.findOneByName(accountType);
@@ -253,9 +279,13 @@ export class UserService implements  IUserService {
         return user
     }
 
-    async validateUserStatus(status: string, user: User): Promise<User> {
+    async validateUserStatus(status: string, user: User, required: boolean = true): Promise<User> {
         if (!status) {
-            throw new InvalidUserStatusException()
+            if (required) {
+                throw new InvalidUserStatusException()
+            }
+
+            return user
         }
 
         const statusRegister = await this.userStatusRepository.findOneByName(status);
@@ -271,6 +301,10 @@ export class UserService implements  IUserService {
     }
 
     async validateCpf(cpf: string, user: User): Promise<User> {
+        if (!cpf) {
+            return user;
+        }
+
         const userAlreadyExists = await this.userRepository.findOneByCpf(cpf);
 
         if (userAlreadyExists) {
