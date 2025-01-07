@@ -5,6 +5,9 @@ import {CreateUserDto, RegisterUserDto, UpdateUserDto} from "./dto";
 import {convertQueryParams, toResultAsync} from "@shared/utils";
 import {UserMapper} from "@shared/mappers";
 import {FastifyInstance} from "fastify";
+import jwt from "jsonwebtoken";
+import {readFileSync} from "fs";
+import {InvalidAccountTypeException, InvalidUserStatusException, InvalidUserTypeException} from "@domain/exceptions";
 
 export class UsersController extends BaseController {
 
@@ -80,7 +83,7 @@ export class UsersController extends BaseController {
     async createUserRouteHandler(req: Request, res: Response, userService: IUserService) {
         const data = CreateUserDto.parse(req.body)
 
-        const [err, user] = await toResultAsync(userService.createUser(data))
+        const [err, user] = await toResultAsync(userService.createUser(data as any))
 
         if (err) {
             const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
@@ -101,6 +104,25 @@ export class UsersController extends BaseController {
     async updateUserRouteHandler(req: Request, res: Response, userService: IUserService) {
         const data = UpdateUserDto.parse(req.body)
         const userId = (req.params as any).id!
+
+        const requesterData = jwt.verify(
+            req.headers!.authorization!.split(' ')[1]!,
+            readFileSync('certs/private.key')
+        )
+
+        if (['player', 'affiliate'].includes((requesterData as any).userType)) {
+            if (data.userType) {
+                throw new InvalidUserTypeException()
+            }
+
+            if (data.status) {
+                throw new InvalidUserStatusException()
+            }
+
+            if (data.accountType) {
+                throw new InvalidAccountTypeException()
+            }
+        }
 
         const [err, user] = await toResultAsync(userService.updateUser(userId, data))
 
