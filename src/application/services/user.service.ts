@@ -189,6 +189,10 @@ export class UserService implements  IUserService {
             throw new Error('Not found user')
         }
 
+        if (data.userType === 'administrator') {
+            throw new InvalidUserTypeException();
+        }
+
         Object.assign(user, data)
 
         const [
