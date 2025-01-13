@@ -94,6 +94,27 @@ export class PrismaUserRepository implements UserRepository {
         return UserMapper.toDomain(user)
     }
 
+    async findOneByCpfOrEmail(value: string): Promise<User | null> {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                OR: [
+                    { cpf: value },
+                    { email: value },
+                ]
+            },
+            include: {
+                userType: true,
+                accountType: true,
+                status: true,
+                affiliate: true
+            }
+        });
+
+        if (!user) return null
+
+        return UserMapper.toDomain(user)
+    }
+
     async findAll(params: IGetAllUsersParams): Promise<User[]> {
         const matchParams = transformGetAllUsersParams(params)
 

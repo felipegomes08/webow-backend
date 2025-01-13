@@ -34,7 +34,17 @@ export class CpfAlreadyExistsException extends Error {
     constructor() {
         super()
         this.name = CpfAlreadyExistsException.name
-        this.message = 'Cpf already exists!'
+        this.message = 'Já existe um usuário com este CPF!'
+    }
+}
+
+export class EmailAlreadyExistsException extends Error {
+    public readonly httpStatusCode = 409
+
+    constructor() {
+        super()
+        this.name = EmailAlreadyExistsException.name
+        this.message = 'Já existe um usuário com esse e-mail!'
     }
 }
 

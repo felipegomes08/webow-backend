@@ -44,7 +44,7 @@ export interface IUser {
 
 export interface IRegisterUser {
     name?: string;
-    cpf: string;
+    cpf?: string;
     phone: string;
     email?: string;
     uf?: string;

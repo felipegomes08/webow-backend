@@ -16,7 +16,7 @@ import {
 import {RefreshToken, User} from "@domain/entities";
 import {toResultAsync} from "@shared/utils";
 import {
-    CpfAlreadyExistsException,
+    CpfAlreadyExistsException, EmailAlreadyExistsException,
     InvalidAccountTypeException,
     InvalidUserStatusException,
     InvalidUserTypeException
@@ -39,7 +39,7 @@ export class UserService implements  IUserService {
     async registerUser(dto: IRegisterUser) {
         const user = new User({
             name: dto.name ?? "",
-            cpf: dto.cpf,
+            cpf: dto.cpf ?? "",
             phone: dto.phone,
             email: dto.email ?? "",
             uf: dto.uf ?? "",
@@ -55,20 +55,22 @@ export class UserService implements  IUserService {
         })
 
         const [
+            [errCpf],
             [errEmail],
             [errAccountType],
             [errUserType],
             [errUserStatus],
             [errAffiliate]
         ] = await Promise.all([
-            toResultAsync(this.validateCpf(dto.cpf, user)),
+            toResultAsync(this.validateCpf(dto.cpf!, user)),
+            toResultAsync(this.validateEmail(dto.email!, user)),
             toResultAsync(this.validateAccountType('beginner', user)),
             toResultAsync(this.validateUserType('player', user)),
             toResultAsync(this.validateUserStatus('active', user)),
             toResultAsync(this.validateAffiliateCode(dto.affiliateCode!, user))
         ]);
 
-        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
+        const err = errCpf || errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
 
         if (err) throw err;
 
@@ -115,6 +117,7 @@ export class UserService implements  IUserService {
         })
 
         const [
+            [errCpf],
             [errEmail],
             [errAccountType],
             [errUserType],
@@ -122,13 +125,14 @@ export class UserService implements  IUserService {
             [errAffiliate]
         ] = await Promise.all([
             toResultAsync(this.validateCpf(dto.cpf, user)),
+            toResultAsync(this.validateEmail(dto.email!, user)),
             toResultAsync(this.validateAccountType(dto.accountType, user)),
             toResultAsync(this.validateUserType(dto.userType, user)),
             toResultAsync(this.validateUserStatus(dto.status, user)),
             toResultAsync(this.validateAffiliateCode(dto.affiliateCode!, user))
         ]);
 
-        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
+        const err = errCpf || errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
 
         if (err) throw err;
 
@@ -309,6 +313,20 @@ export class UserService implements  IUserService {
 
         if (userAlreadyExists) {
             throw new CpfAlreadyExistsException()
+        }
+
+        return user
+    }
+
+    async validateEmail(email: string, user: User): Promise<User> {
+        if (!email) {
+            return user;
+        }
+
+        const userAlreadyExists = await this.userRepository.findOneByEmail(email);
+
+        if (userAlreadyExists) {
+            throw new EmailAlreadyExistsException()
         }
 
         return user

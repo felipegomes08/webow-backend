@@ -13,6 +13,8 @@ export abstract class UserRepository {
 
     abstract findOneByCpf(cpf: string): Promise<User | null>
 
+    abstract findOneByCpfOrEmail(value: string): Promise<User | null>
+
     abstract findAll(params: IGetAllUsersParams): Promise<User[]>
 
     abstract count(params: IGetAllUsersParams): Promise<number>

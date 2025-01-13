@@ -14,7 +14,7 @@ export class AuthService implements IAuthService {
     {}
 
     async login(dto: IAuthLogin): Promise<IUser> {
-        const user = await this.userRepository.findOneByCpf(dto.cpf);
+        const user = await this.userRepository.findOneByCpfOrEmail(dto.login);
 
         if (!user) {
             throw new InvalidAuthException();
