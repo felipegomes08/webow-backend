@@ -101,7 +101,7 @@ export class UserService implements  IUserService {
     async createUser(dto: ICreateUser): Promise<IUser> {
         const user = new User({
             name: dto.name,
-            cpf: dto.cpf,
+            cpf: dto.cpf ?? "",
             phone: dto.phone,
             email: dto.email,
             uf: dto.uf,
@@ -124,7 +124,7 @@ export class UserService implements  IUserService {
             [errUserStatus],
             [errAffiliate]
         ] = await Promise.all([
-            toResultAsync(this.validateCpf(dto.cpf, user)),
+            toResultAsync(this.validateCpf(dto.cpf!, user)),
             toResultAsync(this.validateEmail(dto.email!, user)),
             toResultAsync(this.validateAccountType(dto.accountType, user)),
             toResultAsync(this.validateUserType(dto.userType, user)),
