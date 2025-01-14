@@ -46,7 +46,7 @@ const pixKeySchema = z
 export const CreateUserDto = z.object({
     name: z.string().min(4, "O nome deve ter pelo menos 4 caracteres").optional(),
     cpf: z.string().length(11).optional(),
-    phone: z.string().min(9),
+    phone: z.string().min(9).optional(),
     email: z.string().email("O email informado não é válido").optional(),
     uf: ufSchema,
     pixKey: pixKeySchema,

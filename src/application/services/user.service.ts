@@ -40,7 +40,7 @@ export class UserService implements  IUserService {
         const user = new User({
             name: dto.name ?? "",
             cpf: dto.cpf ?? "",
-            phone: dto.phone,
+            phone: dto.phone ?? "",
             email: dto.email ?? "",
             uf: dto.uf ?? "",
             pixKey: dto.pixKey ?? "",
@@ -102,7 +102,7 @@ export class UserService implements  IUserService {
         const user = new User({
             name: dto.name,
             cpf: dto.cpf ?? "",
-            phone: dto.phone,
+            phone: dto.phone ?? "",
             email: dto.email,
             uf: dto.uf,
             pixKey: dto.pixKey,
