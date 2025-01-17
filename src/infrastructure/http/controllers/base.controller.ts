@@ -49,7 +49,7 @@ export class BaseController implements IController {
         };
     }
 
-    public patch(path: string, handler: RouteHandler, dto: ZodSchema, roles: string[] = [], requiresAuth: boolean = true) {
+    public patch(path: string, handler: RouteHandler, dto: ZodSchema | null, roles: string[] = [], requiresAuth: boolean = true) {
         this.routes['PATCH_'+path] = {
             method: 'PATCH',
             handler,
@@ -60,7 +60,7 @@ export class BaseController implements IController {
         };
     }
 
-    public delete(path: string, handler: RouteHandler, dto: ZodSchema, roles: string[] = [], requiresAuth: boolean = true) {
+    public delete(path: string, handler: RouteHandler, dto: ZodSchema | null, roles: string[] = [], requiresAuth: boolean = true) {
         this.routes['DELETE_'+path] = {
             method: 'DELETE',
             handler,

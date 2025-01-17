@@ -19,7 +19,7 @@ import {
     CpfAlreadyExistsException, EmailAlreadyExistsException,
     InvalidAccountTypeException,
     InvalidUserStatusException,
-    InvalidUserTypeException
+    InvalidUserTypeException, NotFoundRefreshTokenException, NotFoundUserException
 } from "@domain/exceptions";
 import {generateJwtToken} from "@shared/utils/generate-jwt-token.util";
 
@@ -164,7 +164,7 @@ export class UserService implements  IUserService {
         const user = await this.userRepository.findOneById(id);
 
         if (!user) {
-            throw new Error('Not found user')
+            throw new NotFoundUserException()
         }
 
         const status = await this.userStatusRepository.findOneByName('inactive');
@@ -178,12 +178,14 @@ export class UserService implements  IUserService {
         const refreshToken = await this.refreshTokenRepository.findOneByUserId(user.id);
 
         if (!refreshToken) {
-            throw new Error('Not found refresh token')
+            throw new NotFoundRefreshTokenException()
         }
 
         refreshToken.revoked = true;
 
         await this.refreshTokenRepository.update(refreshToken.id!, refreshToken);
+
+        await this.userRepository.update(id, user)
     }
 
     async updateUser(id: string, data: IUpdateUser): Promise<IUser> {
@@ -193,23 +195,33 @@ export class UserService implements  IUserService {
             throw new Error('Not found user')
         }
 
+        if (data.cpf !== user.cpf) {
+            const [err] = await toResultAsync(this.validateCpf(data.cpf!, user))
+
+            if (err) throw new CpfAlreadyExistsException()
+        }
+
+        if (data.email !== user.email) {
+            const [err] = await toResultAsync(this.validateEmail(data.email!, user))
+
+            if (err) throw new EmailAlreadyExistsException()
+        }
+
         Object.assign(user, data)
 
         const [
-            [errEmail],
             [errAccountType],
             [errUserType],
             [errUserStatus],
             [errAffiliate]
         ] = await Promise.all([
-            toResultAsync(this.validateCpf(data.cpf!, user)),
             toResultAsync(this.validateAccountType(data.accountType!, user, false)),
             toResultAsync(this.validateUserType(data.userType!, user, false)),
             toResultAsync(this.validateUserStatus(data.status!, user, false)),
             toResultAsync(this.validateAffiliateCode(data.affiliateCode!, user))
         ]);
 
-        const err = errEmail || errAccountType || errUserType || errUserStatus || errAffiliate;
+        const err = errAccountType || errUserType || errUserStatus || errAffiliate;
 
         if (err) throw err;
 
@@ -305,7 +317,7 @@ export class UserService implements  IUserService {
     }
 
     async validateCpf(cpf: string, user: User): Promise<User> {
-        if (!cpf) {
+        if (!cpf || (cpf === user.cpf)) {
             return user;
         }
 
@@ -319,7 +331,7 @@ export class UserService implements  IUserService {
     }
 
     async validateEmail(email: string, user: User): Promise<User> {
-        if (!email) {
+        if (!email || (email === user.email)) {
             return user;
         }
 

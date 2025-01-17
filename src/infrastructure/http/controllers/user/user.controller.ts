@@ -42,6 +42,14 @@ export class UsersController extends BaseController {
             true
         )
 
+        this.delete(
+            '/api/users/:id',
+            async (req, res) => this.deleteUserRouteHandler(req, res, this.userService),
+            null,
+            ['administrator'],
+            true
+        )
+
         this.get(
             '/api/users/:id',
             async (req, res) => this.getUserRouteHandler(req, res, this.userService),
@@ -138,6 +146,27 @@ export class UsersController extends BaseController {
             success: true,
             data: UserMapper.toController(user)
         })
+    }
+
+    async deleteUserRouteHandler(req: Request, res: Response, userService: IUserService) {
+        const { id } = req.params as any
+
+        const [err] = await toResultAsync(userService.deleteUser(id))
+
+        if (err) {
+            const message = !err.httpStatusCode ? 'Internal Server Error' : err.message
+            const statusCode = err.httpStatusCode ?? 500
+            console.error(err)
+            return res.setStatusCode(statusCode).send({
+                success: false,
+                message
+            })
+        }
+
+        res.setStatusCode(204).send({
+            success: true,
+            data: null
+        });
     }
 
     async getUserRouteHandler(req: Request, res: Response, userService: IUserService) {

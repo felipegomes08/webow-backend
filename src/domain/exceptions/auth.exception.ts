@@ -17,3 +17,13 @@ export class InvalidRefreshTokenException extends Error {
         this.message = 'Refresh Token Inválido!'
     }
 }
+
+export class NotFoundRefreshTokenException extends Error {
+    public readonly httpStatusCode = 404
+
+    constructor() {
+        super()
+        this.name = NotFoundRefreshTokenException.name
+        this.message = 'Refresh Token Não Encontrado'
+    }
+}
