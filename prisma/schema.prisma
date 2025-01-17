@@ -194,14 +194,15 @@ model AffiliateEarning {
 }
 
 model Ticket {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  supportId String   @map("support_id") @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  supportId String?   @map("support_id") @db.Uuid
   subject   String
-  createdAt DateTime @default(now()) @map("created_at")
-  closedAt  DateTime @map("closed_at")
-  user      User     @relation("TicketUser", fields: [userId], references: [id])
-  support   User     @relation("TicketUserSupport", fields: [supportId], references: [id])
+  createdAt DateTime  @default(now()) @map("created_at")
+  closedAt  DateTime? @map("closed_at")
+  deleted   Boolean   @default(false)
+  user      User      @relation("TicketUser", fields: [userId], references: [id])
+  support   User?     @relation("TicketUserSupport", fields: [supportId], references: [id])
 
   ticketMessages TicketMessage[]
 

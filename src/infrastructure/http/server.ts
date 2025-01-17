@@ -3,13 +3,17 @@ import {FastifyAdapter} from "@infrastructure/http/adapters";
 import {
     affiliateServiceFactory,
     authServiceFactory,
-    configurationServiceFactory, matchServiceFactory, metadataServiceFactory, transactionServiceFactory,
+    configurationServiceFactory,
+    matchServiceFactory,
+    metadataServiceFactory,
+    ticketsServiceFactory,
+    transactionServiceFactory,
     userServiceFactory
 } from "@shared/factories";
 import {
     AuthController,
     ConfigurationController, MatchController,
-    MetadataController, TransactionController,
+    MetadataController, TicketController, TransactionController,
     UsersController
 } from "@infrastructure/http/controllers";
 import {AffiliateController} from "@infrastructure/http/controllers/affiliate/affiliate.controller";
@@ -24,6 +28,7 @@ export async function bootstrap(prisma: PrismaClient) {
     const metadataService = metadataServiceFactory(prisma);
     const transactionService = transactionServiceFactory(prisma);
     const matchService = matchServiceFactory(prisma);
+    const ticketService = ticketsServiceFactory(prisma)
 
     const userController = new UsersController(httpServer.fastify, userService)
     const authController = new AuthController(httpServer.fastify, authService)
@@ -32,6 +37,7 @@ export async function bootstrap(prisma: PrismaClient) {
     const metadataController = new MetadataController(httpServer.fastify, metadataService)
     const transactionController = new TransactionController(httpServer.fastify, transactionService)
     const matchController = new MatchController(httpServer.fastify, matchService)
+    const ticketController = new TicketController(httpServer.fastify, ticketService)
 
     await httpServer
         .addController(authController)
@@ -41,6 +47,7 @@ export async function bootstrap(prisma: PrismaClient) {
         .addController(metadataController)
         .addController(transactionController)
         .addController(matchController)
+        .addController(ticketController)
         .start()
 
     const shutdown = async (signal: string) => {

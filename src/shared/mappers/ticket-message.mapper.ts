@@ -1,15 +1,20 @@
-import { TicketMessage as PrismaTicketMessage } from "@prisma/client";
+import {
+    TicketMessage as PrismaTicketMessage,
+    Ticket as PrismaTicket,
+    User as PrismaUser,
+} from "@prisma/client";
 import { TicketMessage } from "@domain/entities";
-import { ITicket } from "@interfaces/ticket";
-import { IUser } from "@interfaces/user";
+import { ITicketMessage } from "@interfaces/ticket";
+import {UserMapper} from "@shared/mappers/user.mapper";
+import {TicketMapper} from "@shared/mappers/ticket.mapper";
 
 export interface TicketMessagePrismaWithJoins extends PrismaTicketMessage {
-    ticket?: ITicket;
-    sender?: IUser;
+    ticket?: PrismaTicket;
+    sender?: PrismaUser;
 }
 
 export class TicketMessageMapper {
-    static toDomain(data: TicketMessagePrismaWithJoins): TicketMessage {
+    static toDomain(data: TicketMessagePrismaWithJoins): ITicketMessage {
         return new TicketMessage({
             id: data.id,
             ticketId: data.ticketId,
@@ -17,11 +22,14 @@ export class TicketMessageMapper {
             content: data.content,
             createdAt: data.createdAt,
             ticket: data.ticket,
-            sender: data.sender,
+            sender: {
+                ...data.sender!,
+                balance: data.sender!.balance.toNumber()
+            },
         });
     }
 
-    static toPrisma(domain: TicketMessage): Omit<PrismaTicketMessage, "id"> {
+    static toPrisma(domain: ITicketMessage): Omit<PrismaTicketMessage, "id"> {
         return {
             ticketId: domain.ticketId,
             senderId: domain.senderId,
@@ -30,15 +38,15 @@ export class TicketMessageMapper {
         };
     }
 
-    static toController(domain: TicketMessage) {
+    static toController(domain: ITicketMessage) {
         return {
             id: domain.id,
             ticketId: domain.ticketId,
             senderId: domain.senderId,
             content: domain.content,
             createdAt: domain.createdAt,
-            ticket: domain.ticket,
-            sender: domain.sender,
+            ticket: domain.ticket ? TicketMapper.toController(domain.ticket) : null,
+            sender: domain.sender ? UserMapper.toController(domain.sender) : null,
         };
     }
 }

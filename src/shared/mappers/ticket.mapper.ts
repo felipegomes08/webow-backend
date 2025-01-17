@@ -1,9 +1,11 @@
 import { Ticket as PrismaTicket, User as PrismaUser } from "@prisma/client";
 import { Ticket } from "@domain/entities";
+import {ITicket} from "@interfaces/ticket";
+import {UserMapper} from "@shared/mappers/user.mapper";
 
 export interface TicketPrismaWithJoins extends PrismaTicket {
-    user: PrismaUser;
-    support: PrismaUser;
+    user?: PrismaUser | null;
+    support?: PrismaUser | null;
 }
 
 export class TicketMapper {
@@ -15,28 +17,29 @@ export class TicketMapper {
             subject: data.subject,
             createdAt: data.createdAt,
             closedAt: data.closedAt,
-            user: {
-                ...data.user,
-                balance: data.user.balance.toNumber()
-            },
-            support: {
-                ...data.support,
-                balance: data.support.balance.toNumber()
-            },
+            deleted: data.deleted,
+            user: data.user ? {
+                ...data.user!,
+                balance: data.user!.balance.toNumber()
+            } : null,
+            support: data.support! ? {
+                ...data.support!,
+                balance: data.support!.balance.toNumber()
+            } : null,
         });
     }
 
-    static toPrisma(domain: Ticket): Omit<PrismaTicket, "id"> {
+    static toPrisma(domain: ITicket): Omit<PrismaTicket, "id" | "supportId"> {
         return {
             userId: domain.userId,
-            supportId: domain.supportId,
             subject: domain.subject,
             createdAt: domain.createdAt,
             closedAt: domain.closedAt,
+            deleted: domain.deleted
         };
     }
 
-    static toController(domain: Ticket) {
+    static toController(domain: ITicket) {
         return {
             id: domain.id,
             userId: domain.userId,
@@ -44,8 +47,9 @@ export class TicketMapper {
             subject: domain.subject,
             createdAt: domain.createdAt,
             closedAt: domain.closedAt,
-            user: domain.user,
-            support: domain.support,
+            deleted: domain.deleted,
+            user: domain.user ? UserMapper.toController(domain.user): null,
+            support: domain.support ? UserMapper.toController(domain.support) : null,
         };
     }
 }
